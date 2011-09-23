@@ -1,3 +1,62 @@
 <?xml version="1.0"?>
 <objects>
+<!-- ('', 'zport', 'dmd', 'Devices', 'rrdTemplates', 'RabbitMQNode') -->
+<object id='/zport/dmd/Devices/rrdTemplates/RabbitMQNode' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
+<property id='zendoc' type='string'>
+Monitors the status of a RabbitMQ node by running rabbitmqctl via SSH.
+</property>
+<property type="text" id="description" mode="w" >
+Monitors the status of a RabbitMQ node by running rabbitmqctl via SSH.
+</property>
+<property type="string" id="targetPythonClass" mode="w" >
+ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQNode
+</property>
+<tomanycont id='datasources'>
+<object id='rabbitmqctl' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+COMMAND
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/title}
+</property>
+<property type="string" id="eventClass" mode="w" >
+/Status/RabbitMQ
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property type="string" id="commandTemplate" mode="w" >
+rabbitmqctl -n ${here/title} status 2&gt;&amp;1
+</property>
+<property type="int" id="cycletime" mode="w" >
+60
+</property>
+<property type="boolean" id="usessh" mode="w" >
+True
+</property>
+<property type="string" id="parser" mode="w" >
+ZenPacks.zenoss.RabbitMQ.parsers.Node
+</property>
+</object>
+</tomanycont>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Perf', 'RabbitMQ') -->
+<object id='/zport/dmd/Events/Perf/RabbitMQ' module='Products.ZenEvents.EventClass' class='EventClass'>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'RabbitMQ') -->
+<object id='/zport/dmd/Events/Status/RabbitMQ' module='Products.ZenEvents.EventClass' class='EventClass'>
+<tomanycont id='instances'>
+<object id='rabbitmq_node_status' module='Products.ZenEvents.EventClassInst' class='EventClassInst'>
+<property type="string" id="eventClassKey" mode="w" >
+rabbitmq_node_status
+</property>
+<property type="int" id="sequence" mode="w" >
+7
+</property>
+</object>
+</tomanycont>
+</object>
 </objects>

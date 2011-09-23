@@ -11,6 +11,9 @@
 #
 ###########################################################################
 
+import logging
+LOG = logging.getLogger('zen.RabbitMQ')
+
 import re
 
 from Products.DataCollector.plugins.CollectorPlugin import CommandPlugin
@@ -20,7 +23,7 @@ from Products.ZenUtils.Utils import prepId
 
 class RabbitMQ(CommandPlugin):
     command = (
-        'rabbitmqctl status ; '
+        'rabbitmqctl status 2>&1 && ('
         'echo __COMMAND__ ; '
         'for vhost in $(rabbitmqctl -q list_vhosts) ; do '
         'echo "VHOST: $vhost" ; '
@@ -32,30 +35,47 @@ class RabbitMQ(CommandPlugin):
         'name durable auto_delete arguments ; '
         'echo "__VHOST__" ; '
         'done'
+        ')'
         )
 
-    def process(self, device, results, log):
-        log.info('Collecting RabbitMQ data for device %s', device.id)
+    def process(self, device, results, unused):
+        LOG.info('Trying rabbitmqctl on %s', device.id)
 
-        status_string, vhosts_string = results.split('__COMMAND__')
+        # [0] == status, [1] == everything else (optional)
+        command_strings = results.split('__COMMAND__')
 
         maps = []
 
         # nodes - only one for now
+        node_title = None
         node_id = None
         nodes = []
-        for line in status_string.split('\n'):
+
+        for line in command_strings[0].split('\n'):
             match = re.search(r'Status of node (\S+)\s', line)
             if match:
-                node_id = prepId(match.group(1))
+                node_title = match.group(1)
+                node_id = prepId(node_title)
                 nodes.append(ObjectMap(data={
                     'id': node_id,
                     'title': match.group(1),
                     }))
 
-                break
+                continue
 
-        if len(nodes) < 1:
+            match = re.search(r'^(Error: .+)$', line)
+            if match:
+                LOG.info('Found node %s in error state on %s',
+                    node_title, device.id)
+
+                # We can't find enough information to knowingly update the
+                # model if RabbitMQ is down.
+                return None
+
+        if len(nodes) > 0:
+            LOG.info('Found node %s on %s', node_title, device.id)
+        else:
+            LOG.info('No node found on %s', device.id)
             return None
 
         maps.append(RelationshipMap(
@@ -65,11 +85,11 @@ class RabbitMQ(CommandPlugin):
 
         # vhosts
         maps.extend(self.getVHostRelMap(
-            vhosts_string, 'rabbitmq_nodes/%s' % node_id))
+            device, command_strings[1], 'rabbitmq_nodes/%s' % node_id))
 
         return maps
 
-    def getVHostRelMap(self, vhosts_string, compname):
+    def getVHostRelMap(self, device, vhosts_string, compname):
         rel_maps = []
         object_maps = []
 
@@ -82,17 +102,30 @@ class RabbitMQ(CommandPlugin):
 
             match = re.search('VHOST:\s+(.+)$', name_string)
             if match:
-                vhost_id = prepId(match.group(1))
+                vhost_title = match.group(1)
+                vhost_id = prepId(vhost_title)
+
                 object_maps.append(ObjectMap(data={
                     'id': vhost_id,
-                    'title': match.group(1),
+                    'title': vhost_title,
                     }))
 
-                rel_maps.extend(self.getExchangeRelMap(exchanges_string,
-                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id)))
+                exchanges = self.getExchangeRelMap(exchanges_string,
+                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id))
 
-                rel_maps.extend(self.getQueueRelMap(queues_string,
-                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id)))
+                queues = self.getQueueRelMap(queues_string,
+                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id))
+
+                LOG.info(
+                    'Found vhost %s with %d exchanges and %d queues on %s',
+                    vhost_title, len(exchanges.maps), len(queues.maps),
+                    device.id)
+
+                rel_maps.append(exchanges)
+                rel_maps.append(queues)
+
+        if len(object_maps) < 1:
+            LOG.info('No vhosts found on %s', device.id)
 
         return [RelationshipMap(
             compname=compname,
@@ -121,11 +154,11 @@ class RabbitMQ(CommandPlugin):
                 'arguments': arguments,
                 }))
 
-        return [RelationshipMap(
+        return RelationshipMap(
             compname=compname,
             relname='rabbitmq_exchanges',
             modname='ZenPacks.zenoss.RabbitMQ.RabbitMQExchange',
-            objmaps=object_maps)]
+            objmaps=object_maps)
 
     def getQueueRelMap(self, queues_string, compname):
         object_maps = []
@@ -144,8 +177,8 @@ class RabbitMQ(CommandPlugin):
                 'arguments': arguments,
                 }))
 
-        return [RelationshipMap(
+        return RelationshipMap(
             compname=compname,
             relname='rabbitmq_queues',
             modname='ZenPacks.zenoss.RabbitMQ.RabbitMQQueue',
-            objmaps=object_maps)]
+            objmaps=object_maps)

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure xmlns="http://namespaces.zope.org/browser">
+
+    <resourceDirectory
+        name="rabbitmq"
+        directory="resources"
+        />
+
+    <viewlet
+        name="js-rabbitmqdevice"
+        paths="/++resource++rabbitmq/js/RabbitMQDevice.js"
+        weight="10"
+        for="Products.ZenModel.Device.Device"
+        manager="Products.ZenUI3.browser.interfaces.IJavaScriptSrcManager"
+        class="Products.ZenUI3.browser.javascript.JavaScriptSrcBundleViewlet"
+        permission="zope2.Public"
+        />
+            
+</configure>
+

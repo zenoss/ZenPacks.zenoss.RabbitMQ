@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure xmlns="http://namespaces.zope.org/zope">
+
+    <!-- Info Adapters -->
+    <adapter
+        provides=".interfaces.IRabbitMQNodeInfo"
+        for=".RabbitMQNode.RabbitMQNode"
+        factory=".info.RabbitMQNodeInfo"
+        />
+
+    <adapter
+        provides=".interfaces.IRabbitMQVHostInfo"
+        for=".RabbitMQVHost.RabbitMQVHost"
+        factory=".info.RabbitMQVHostInfo"
+        />
+
+    <adapter
+        provides=".interfaces.IRabbitMQExchangeInfo"
+        for=".RabbitMQExchange.RabbitMQExchange"
+        factory=".info.RabbitMQExchangeInfo"
+        />
+
+    <adapter
+        provides=".interfaces.IRabbitMQQueueInfo"
+        for=".RabbitMQQueue.RabbitMQQueue"
+        factory=".info.RabbitMQQueueInfo"
+        />
+
+
+    <!-- Include Browser Code -->
+    <include package=".browser"/>       
+
+</configure>

@@ -67,7 +67,6 @@ class RabbitMQ(CommandPlugin):
         maps.extend(self.getVHostRelMap(
             vhosts_string, 'rabbitmq_nodes/%s' % node_id))
 
-        import pdb; pdb.set_trace()
         return maps
 
     def getVHostRelMap(self, vhosts_string, compname):

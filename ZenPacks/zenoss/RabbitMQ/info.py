@@ -11,9 +11,16 @@
 #
 ###########################################################################
 
+from zope.interface import implements
+
 from Products.Zuul.decorators import info
 from Products.Zuul.infos import ProxyProperty
 from Products.Zuul.infos.component import ComponentInfo
+
+from .interfaces import (
+    IRabbitMQNodeInfo, IRabbitMQVHostInfo, IRabbitMQExchangeInfo,
+    IRabbitMQQueueInfo,
+    )
 
 
 class RabbitMQComponentInfo(ComponentInfo):
@@ -26,6 +33,8 @@ class RabbitMQComponentInfo(ComponentInfo):
 
 
 class RabbitMQNodeInfo(RabbitMQComponentInfo):
+    implements(IRabbitMQNodeInfo)
+
     @property
     def vhostCount(self):
         return self._object.rabbitmq_vhosts.countObjects()
@@ -48,6 +57,8 @@ class RabbitMQNodeInfo(RabbitMQComponentInfo):
 
 
 class RabbitMQVHostInfo(RabbitMQComponentInfo):
+    implements(IRabbitMQVHostInfo)
+
     @property
     @info
     def rabbitmq_node(self):
@@ -63,6 +74,8 @@ class RabbitMQVHostInfo(RabbitMQComponentInfo):
 
 
 class RabbitMQExchangeInfo(RabbitMQComponentInfo):
+    implements(IRabbitMQExchangeInfo)
+
     exchange_type = ProxyProperty('exchange_type')
     durable = ProxyProperty('durable')
     auto_delete = ProxyProperty('auto_delete')
@@ -80,6 +93,8 @@ class RabbitMQExchangeInfo(RabbitMQComponentInfo):
 
 
 class RabbitMQQueueInfo(RabbitMQComponentInfo):
+    implements(IRabbitMQQueueInfo)
+
     durable = ProxyProperty('durable')
     auto_delete = ProxyProperty('auto_delete')
     arguments = ProxyProperty('arguments')

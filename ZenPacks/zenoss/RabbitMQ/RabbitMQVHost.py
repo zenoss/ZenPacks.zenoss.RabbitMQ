@@ -19,7 +19,7 @@ from .RabbitMQComponent import RabbitMQComponent
 class RabbitMQVHost(RabbitMQComponent):
     meta_type = portal_type = "RabbitMQVHost"
 
-    _relations = RabbitMQComponent._properties + (
+    _relations = RabbitMQComponent._relations + (
         ('rabbitmq_node', ToOne(ToManyCont,
             'ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQNode',
             'rabbitmq_vhosts',
@@ -33,3 +33,6 @@ class RabbitMQVHost(RabbitMQComponent):
             'rabbitmq_vhost',
             ),),
         )
+
+    def device(self):
+        return self.rabbitmq_node().device()

@@ -31,9 +31,12 @@ class RabbitMQExchange(RabbitMQComponent):
         {'id': 'arguments', 'type': 'string', 'mode': 'w'},
         )
 
-    _relations = RabbitMQComponent._properties + (
+    _relations = RabbitMQComponent._relations + (
         ('rabbitmq_vhost', ToOne(ToManyCont,
             'ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQVHost',
             'rabbitmq_exchanges',
             ),),
         )
+
+    def device(self):
+        return self.rabbitmq_vhost().device()

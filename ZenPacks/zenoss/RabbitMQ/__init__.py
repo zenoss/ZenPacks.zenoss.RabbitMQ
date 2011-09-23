@@ -35,7 +35,7 @@ for relname, modname in NEW_DEVICE_RELATIONS:
     if relname not in (x[0] for x in Device._relations):
         Device._relations += (
             (relname, ToManyCont(ToOne,
-                '.'.join((ZENPACK_NAME, modname)), 'device')),
+                '.'.join((ZENPACK_NAME, modname)), 'rabbitmq_host')),
             )
 
 

@@ -60,48 +60,58 @@ class RabbitMQ(CommandPlugin):
 
         maps.append(RelationshipMap(
             relname='rabbitmq_nodes',
-            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQNode',
+            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQNode',
             objmaps=nodes))
 
         # vhosts
-        for vhost_string in vhosts_string.split('__VHOST__'):
-            maps.extend(self.getVhostRelMap(
-                vhost_string, 'rabbitmq_nodes/%s' % node_id))
+        maps.extend(self.getVHostRelMap(
+            vhosts_string, 'rabbitmq_nodes/%s' % node_id))
 
+        import pdb; pdb.set_trace()
         return maps
 
-    def getVHostRelMap(self, vhost_string, compname):
-        name_string, exchanges_string, queues_string = \
-            vhost_string.split('__SPLIT__')
-
+    def getVHostRelMap(self, vhosts_string, compname):
         rel_maps = []
         object_maps = []
 
-        match = re.search('VHOST:\s+(.+)$', name_string)
-        if match:
-            vhost_id = prepId(match.group(1))
-            object_maps.append(ObjectMap(data={
-                'id': vhost_id,
-                'title': match.group(1),
-                }))
+        for vhost_string in vhosts_string.split('__VHOST__'):
+            if not vhost_string.strip():
+                continue
 
-            rel_maps.extend(self.getExchangeRelMap(
-                exchanges_string, '%s/vhosts/%s' % (compname, vhost_id)))
+            name_string, exchanges_string, queues_string = \
+                vhost_string.split('__SPLIT__')
 
-            rel_maps.extend(self.getQueueRelMap(
-                queues_string, '%s/vhosts/%s' % (compname, vhost_id)))
+            match = re.search('VHOST:\s+(.+)$', name_string)
+            if match:
+                vhost_id = prepId(match.group(1))
+                object_maps.append(ObjectMap(data={
+                    'id': vhost_id,
+                    'title': match.group(1),
+                    }))
+
+                rel_maps.extend(self.getExchangeRelMap(exchanges_string,
+                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id)))
+
+                rel_maps.extend(self.getQueueRelMap(queues_string,
+                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id)))
 
         return [RelationshipMap(
             compname=compname,
             relname='rabbitmq_vhosts',
-            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQVHost.RabbitMQVHost',
+            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQVHost',
             objmaps=object_maps)] + rel_maps
 
     def getExchangeRelMap(self, exchanges_string, compname):
         object_maps = []
-        for exchange_string in exchanges_string:
+        for exchange_string in exchanges_string.split('\n'):
+            if not exchange_string.strip():
+                continue
+
             name, exchange_type, durable, auto_delete, arguments = \
                 re.split(r'\s+', exchange_string)
+
+            if not name:
+                name = 'amq.default'
 
             object_maps.append(ObjectMap(data={
                 'id': prepId(name),
@@ -115,12 +125,15 @@ class RabbitMQ(CommandPlugin):
         return [RelationshipMap(
             compname=compname,
             relname='rabbitmq_exchanges',
-            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQExchange.RabbitMQExchange',
+            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQExchange',
             objmaps=object_maps)]
 
     def getQueueRelMap(self, queues_string, compname):
         object_maps = []
-        for queue_string in queues_string:
+        for queue_string in queues_string.split('\n'):
+            if not queue_string.strip():
+                continue
+
             name, durable, auto_delete, arguments = \
                 re.split(r'\s+', queue_string)
 
@@ -135,5 +148,5 @@ class RabbitMQ(CommandPlugin):
         return [RelationshipMap(
             compname=compname,
             relname='rabbitmq_queues',
-            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQQueue.RabbitMQQueue',
+            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQQueue',
             objmaps=object_maps)]

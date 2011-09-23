@@ -20,7 +20,7 @@ class RabbitMQNode(RabbitMQComponent):
     meta_type = portal_type = "RabbitMQNode"
 
     _relations = RabbitMQComponent._relations + (
-        ('device', ToOne(ToManyCont,
+        ('rabbitmq_host', ToOne(ToManyCont,
             'Products.ZenModel.Device.Device',
             'rabbitmq_nodes',
             ),),
@@ -29,3 +29,6 @@ class RabbitMQNode(RabbitMQComponent):
             'rabbitmq_node',
             ),),
         )
+
+    def device(self):
+        return self.rabbitmq_host()

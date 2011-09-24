@@ -52,6 +52,10 @@ def loadData(keys, expiration=1800):
 
 
 class Node(CommandParser):
+    eventKey = eventClassKey = 'rabbitmq_node_status'
+
+    event = None
+
     def processResults(self, cmd, result):
         """
         Router method that allows this parser to be used for all rabbitmqctl
@@ -60,62 +64,21 @@ class Node(CommandParser):
         if 'rabbitmqctl' not in cmd.command:
             return
 
+        # Get as much error handling out of the way right away.
+        if self.isError(cmd, result):
+            return
+
+        # Route to the right parser based on the command.
         if 'status' in cmd.command:
             self.processStatusResults(cmd, result)
         elif 'list_connections' in cmd.command:
             self.processListConnectionsResults(cmd, result)
+        elif 'list_channels' in cmd.command:
+            self.processListChannelsResults(cmd, result)
 
     def processStatusResults(self, cmd, result):
-        eventKey = eventClassKey = 'rabbitmq_node_status'
-
-        notfound_matcher = re.compile(r'command not found').search
-        error_matcher = re.compile(r'^Error: (.+)$').search
-        done_matcher = re.compile(r'\.\.\.done').search
-
-        ok = False
-        event = dict(
-            component=cmd.component,
-            eventClassKey=eventClassKey,
-            eventKey=eventKey,
-            )
-
-        for line in cmd.result.output.split('\n'):
-            if notfound_matcher(line):
-                result.events.append(dict(
-                    summary='command not found: rabbitmqctl',
-                    severity=cmd.severity,
-                    **event
-                    ))
-
-                return
-
-            match = error_matcher(line)
-            if match:
-                result.events.append(dict(
-                    summary=match.group(1),
-                    severity=cmd.severity,
-                    **event
-                    ))
-
-                return
-
-            if done_matcher(line):
-                ok = True
-
-        if ok:
-            result.events.append(dict(
-                summary='node status is OK',
-                severity=0,
-                **event
-                ))
-
-            return
-
-        result.events.append(dict(
-            summary='node status is indeterminate',
-            severity=cmd.severity,
-            **event
-            ))
+        result.events.append(self.getEvent(
+            cmd, "node status is OK", clear=True))
 
     def processListConnectionsResults(self, cmd, result):
         connections = {}
@@ -138,6 +101,9 @@ class Node(CommandParser):
                 sendCount=int(fields[5]),
                 sendQueue=int(fields[6]),
                 )
+
+        if len(connections.keys()) < 1:
+            return
 
         dp_map = dict([(dp.id, dp) for dp in cmd.points])
 
@@ -165,7 +131,7 @@ class Node(CommandParser):
         for field in delta_fields:
             deltas[field] = 0
 
-        data_keys = [cmd.deviceConfig.device, cmd.component]
+        data_keys = [cmd.deviceConfig.device, cmd.component, 'connections']
         old = loadData(data_keys) or {}
         saveData(data_keys, connections)
 
@@ -187,3 +153,86 @@ class Node(CommandParser):
             if field in dp_map:
                 result.values.append((
                     dp_map[field], deltas[field]))
+
+    def processListChannelsResults(self, cmd, result):
+        channels = {}
+
+        for line in cmd.result.output.split('\n'):
+            if not line:
+                continue
+
+            fields = re.split(r'\s+', line.rstrip())
+
+            # pid consumer_count messages_unacknowledged acks_uncommitted
+            if len(fields) != 4:
+                return
+
+            channels[fields[0]] = dict(
+                consumers=int(fields[1]),
+                unacknowledged=int(fields[2]),
+                uncommitted=int(fields[3]),
+                )
+
+        if len(channels.keys()) < 1:
+            return
+
+        dp_map = dict([(dp.id, dp) for dp in cmd.points])
+
+        if 'consumers' in dp_map:
+            result.values.append((dp_map['consumers'], reduce(
+                lambda x, y: x + y,
+                (x['consumers'] for x in channels.values()))))
+
+        if 'unacknowledged' in dp_map:
+            result.values.append((dp_map['unacknowledged'], reduce(
+                lambda x, y: x + y,
+                (x['unacknowledged'] for x in channels.values()))))
+
+        if 'uncommitted' in dp_map:
+            result.values.append((dp_map['uncommitted'], reduce(
+                lambda x, y: x + y,
+                (x['uncommitted'] for x in channels.values()))))
+
+    def isError(self, cmd, result):
+        match = re.search(r'^Error: (.+)$', cmd.result.output, re.MULTILINE)
+        if match:
+            result.events.append(self.getEvent(
+                cmd, match.group(1),
+                message=cmd.result.output))
+
+            return True
+
+        match = re.search(r'command not found', cmd.result.output, re.MULTILINE)
+        if match:
+            result.events.append(self.getEvent(
+                cmd, "command not found: rabbitmqctl",
+                message=cmd.result.output))
+
+            return True
+
+        if cmd.result.exitCode != 0:
+            result.events.append(self.getEvent(
+                cmd, "rabbitmqctl error - see event message",
+                message=cmd.result.output))
+
+            return True
+
+        return False
+
+    def getEvent(self, cmd, summary, message=None, clear=False):
+        event = dict(
+            summary=summary,
+            component=cmd.component,
+            eventKey=self.eventKey,
+            eventClassKey=self.eventClassKey,
+            )
+
+        if message:
+            event['message'] = message
+
+        if clear:
+            event['severity'] = 0
+        else:
+            event['severity'] = cmd.severity
+
+        return event

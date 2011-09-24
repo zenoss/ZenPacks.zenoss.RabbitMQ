@@ -12,6 +12,91 @@ Monitors the status of a RabbitMQ node by running rabbitmqctl via SSH.
 ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQNode
 </property>
 <tomanycont id='datasources'>
+<object id='rabbitChannels' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+COMMAND
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/title}
+</property>
+<property type="string" id="eventClass" mode="w" >
+/Status/RabbitMQ
+</property>
+<property type="string" id="eventKey" mode="w" >
+rabbitmq_node_status
+</property>
+<property type="int" id="severity" mode="w" >
+4
+</property>
+<property type="string" id="commandTemplate" mode="w" >
+rabbitmqctl -q -n ${here/title} list_channels pid consumer_count messages_unacknowledged acks_uncommitted 2&gt;&amp;1
+</property>
+<property type="int" id="cycletime" mode="w" >
+300
+</property>
+<property type="boolean" id="usessh" mode="w" >
+True
+</property>
+<property type="string" id="parser" mode="w" >
+ZenPacks.zenoss.RabbitMQ.parsers.Node
+</property>
+<tomanycont id='datapoints'>
+<object id='consumers' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property id='zendoc' type='string'>
+Number of logical AMQP consumers on this RabbitMQ node.
+</property>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+<property type="string" id="description" mode="w" >
+Number of logical AMQP consumers on this RabbitMQ node.
+</property>
+</object>
+<object id='unacknowledged' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property id='zendoc' type='string'>
+Number of messages delivered, but not yet acknowledged on this RabbitMQ node.
+</property>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+<property type="string" id="description" mode="w" >
+Number of messages delivered, but not yet acknowledged on this RabbitMQ node.
+</property>
+</object>
+<object id='uncommitted' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property id='zendoc' type='string'>
+Number of acknowledgements received in an as yet uncommitted transaction on this RabbitMQ node.
+</property>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+<property type="string" id="description" mode="w" >
+Number of acknowledgements received in an as yet uncommitted transaction on this RabbitMQ node.
+</property>
+</object>
+</tomanycont>
+</object>
 <object id='rabbitConnections' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 COMMAND
@@ -23,10 +108,13 @@ True
 ${here/title}
 </property>
 <property type="string" id="eventClass" mode="w" >
-/Ignore
+/Status/RabbitMQ
+</property>
+<property type="string" id="eventKey" mode="w" >
+rabbitmq_node_status
 </property>
 <property type="int" id="severity" mode="w" >
-1
+4
 </property>
 <property type="string" id="commandTemplate" mode="w" >
 rabbitmqctl -q -n ${here/title} list_connections pid channels recv_oct recv_cnt send_oct send_cnt send_pend 2&gt;&amp;1
@@ -175,11 +263,14 @@ ${here/title}
 <property type="string" id="eventClass" mode="w" >
 /Status/RabbitMQ
 </property>
+<property type="string" id="eventKey" mode="w" >
+rabbitmq_node_status
+</property>
 <property type="int" id="severity" mode="w" >
 4
 </property>
 <property type="string" id="commandTemplate" mode="w" >
-rabbitmqctl -n ${here/title} status 2&gt;&amp;1
+rabbitmqctl -q -n ${here/title} status 2&gt;&amp;1
 </property>
 <property type="int" id="cycletime" mode="w" >
 60
@@ -193,6 +284,121 @@ ZenPacks.zenoss.RabbitMQ.parsers.Node
 </object>
 </tomanycont>
 <tomanycont id='graphDefs'>
+<object id='Channels' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+consumers / msgs
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+4
+</property>
+<tomanycont id='graphPoints'>
+<object id='Consumers' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+2
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%7.0lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+rabbitChannels_consumers
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='Unacknowledged' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+2
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%7.0lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+rabbitChannels_unacknowledged
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='Uncommitted' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+2
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+2
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%7.0lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+rabbitChannels_uncommitted
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
 <object id='Connections and Channels' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100

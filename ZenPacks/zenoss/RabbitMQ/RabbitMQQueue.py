@@ -38,3 +38,11 @@ class RabbitMQQueue(RabbitMQComponent):
 
     def device(self):
         return self.rabbitmq_vhost().device()
+
+    @property
+    def rabbitmq_node_name(self):
+        return self.rabbitmq_vhost().rabbitmq_node().title
+
+    @property
+    def rabbitmq_vhost_name(self):
+        return self.rabbitmq_vhost().title

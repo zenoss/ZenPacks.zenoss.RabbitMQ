@@ -75,6 +75,8 @@ class Node(CommandParser):
             self.processListConnectionsResults(cmd, result)
         elif 'list_channels' in cmd.command:
             self.processListChannelsResults(cmd, result)
+        elif 'list_queues' in cmd.command:
+            self.processListQueuesResults(cmd, result)
 
     def processStatusResults(self, cmd, result):
         result.events.append(self.getEvent(
@@ -192,6 +194,43 @@ class Node(CommandParser):
             result.values.append((dp_map['uncommitted'], reduce(
                 lambda x, y: x + y,
                 (x['uncommitted'] for x in channels.values()))))
+
+    def processListQueuesResults(self, cmd, result):
+        queues = {}
+
+        for line in cmd.result.output.split('\n'):
+            if not line:
+                continue
+
+            fields = re.split(r'\s+', line.rstrip())
+
+            # name messages_ready messages_unacknowledged messages consumers
+            # memory
+            if len(fields) != 6:
+                return
+
+            queues[fields[0]] = dict(
+                ready=int(fields[1]),
+                unacknowledged=int(fields[2]),
+                messages=int(fields[3]),
+                consumers=int(fields[4]),
+                memory=int(fields[5]),
+                )
+
+        if len(queues.keys()) < 1:
+            return
+
+        dp_map = dict([(dp.id, dp) for dp in cmd.points])
+
+        if cmd.component not in queues:
+            return
+
+        for field in (
+            'ready', 'unacknowledged', 'messages', 'consumers', 'memory'):
+
+            if field in dp_map:
+                result.values.append((
+                    dp_map[field], queues[cmd.component][field]))
 
     def isError(self, cmd, result):
         match = re.search(r'^Error: (.+)$', cmd.result.output, re.MULTILINE)

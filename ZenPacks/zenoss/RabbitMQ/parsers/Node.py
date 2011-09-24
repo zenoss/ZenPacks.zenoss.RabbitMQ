@@ -220,17 +220,14 @@ class Node(CommandParser):
         if len(queues.keys()) < 1:
             return
 
-        dp_map = dict([(dp.id, dp) for dp in cmd.points])
+        metrics = (
+            'ready', 'unacknowledged', 'messages', 'consumers', 'memory',
+            )
 
-        if cmd.component not in queues:
-            return
-
-        for field in (
-            'ready', 'unacknowledged', 'messages', 'consumers', 'memory'):
-
-            if field in dp_map:
+        for point in cmd.points:
+            if point.component in queues and point.id in metrics:
                 result.values.append((
-                    dp_map[field], queues[cmd.component][field]))
+                    point, queues[point.component][point.id]))
 
     def isError(self, cmd, result):
         match = re.search(r'^Error: (.+)$', cmd.result.output, re.MULTILINE)
@@ -258,7 +255,7 @@ class Node(CommandParser):
 
         return False
 
-    def getEvent(self, cmd, summary, message=None, clear=False):
+    def getEvent(self, cmd, summary, message=None, component=None, clear=False):
         event = dict(
             summary=summary,
             component=cmd.component,
@@ -268,6 +265,11 @@ class Node(CommandParser):
 
         if message:
             event['message'] = message
+
+        if component is None:
+            event['component'] = cmd.component
+        else:
+            event['component'] = component
 
         if clear:
             event['severity'] = 0

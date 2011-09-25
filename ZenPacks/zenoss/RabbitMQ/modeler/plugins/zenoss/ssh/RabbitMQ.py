@@ -145,6 +145,16 @@ class RabbitMQ(CommandPlugin):
             if not name:
                 name = 'amq.default'
 
+            if re.search(r'true', durable, re.I):
+                durable = True
+            else:
+                durable = False
+
+            if re.search(r'true', auto_delete, re.I):
+                auto_delete = True
+            else:
+                auto_delete = False
+
             object_maps.append(ObjectMap(data={
                 'id': prepId(name),
                 'title': name,
@@ -168,6 +178,16 @@ class RabbitMQ(CommandPlugin):
 
             name, durable, auto_delete, arguments = \
                 re.split(r'\s+', queue_string)
+
+            if re.search(r'true', durable, re.I):
+                durable = True
+            else:
+                durable = False
+
+            if re.search(r'true', auto_delete, re.I):
+                auto_delete = True
+            else:
+                auto_delete = False
 
             object_maps.append(ObjectMap(data={
                 'id': prepId(name),

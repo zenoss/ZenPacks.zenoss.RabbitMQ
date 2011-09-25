@@ -51,7 +51,7 @@ def loadData(keys, expiration=1800):
     return data
 
 
-class Node(CommandParser):
+class RabbitMQCTL(CommandParser):
     eventKey = eventClassKey = 'rabbitmq_node_status'
 
     event = None

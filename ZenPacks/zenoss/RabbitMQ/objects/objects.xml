@@ -41,7 +41,7 @@ rabbitmqctl -q -n ${here/title} list_channels pid consumer_count messages_unackn
 True
 </property>
 <property type="string" id="parser" mode="w" >
-ZenPacks.zenoss.RabbitMQ.parsers.Node
+ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQCTL
 </property>
 <tomanycont id='datapoints'>
 <object id='consumers' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -126,7 +126,7 @@ rabbitmqctl -q -n ${here/title} list_connections pid channels recv_oct recv_cnt 
 True
 </property>
 <property type="string" id="parser" mode="w" >
-ZenPacks.zenoss.RabbitMQ.parsers.Node
+ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQCTL
 </property>
 <tomanycont id='datapoints'>
 <object id='channels' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
@@ -279,7 +279,7 @@ rabbitmqctl -q -n ${here/title} status 2&gt;&amp;1
 True
 </property>
 <property type="string" id="parser" mode="w" >
-ZenPacks.zenoss.RabbitMQ.parsers.Node
+ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQCTL
 </property>
 </object>
 </tomanycont>
@@ -754,7 +754,7 @@ rabbitmqctl -q -n ${here/rabbitmq_node_name} list_queues -p ${here/rabbitmq_vhos
 True
 </property>
 <property type="string" id="parser" mode="w" >
-ZenPacks.zenoss.RabbitMQ.parsers.Node
+ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQCTL
 </property>
 <tomanycont id='datapoints'>
 <object id='consumers' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>

@@ -1,0 +1,53 @@
+Status of node rabbit@dev1 ...
+[{running_applications,[{rabbit,"RabbitMQ","2.2.0"},
+                        {os_mon,"CPO  CXC 138 46","2.1.8"},
+                        {sasl,"SASL  CXC 138 11","2.1.5.4"},
+                        {mnesia,"MNESIA  CXC 138 12","4.4.7"},
+                        {stdlib,"ERTS  CXC 138 10","1.15.5"},
+                        {kernel,"ERTS  CXC 138 10","2.12.5"}]},
+ {nodes,[{disc,[rabbit@dev1]}]},
+ {running_nodes,[rabbit@dev1]}]
+...done.
+__COMMAND__
+VHOST: /
+__SPLIT__
+amq.rabbitmq.log	topic	true	false	[]
+amq.match	headers	true	false	[]
+amq.headers	headers	true	false	[]
+amq.topic	topic	true	false	[]
+amq.direct	direct	true	false	[]
+amq.fanout	fanout	true	false	[]
+	direct	true	false	[]
+__SPLIT__
+__VHOST__
+VHOST: /zenoss
+__SPLIT__
+zenoss.heartbeats	topic	true	false	[]
+zenoss.zenevents.migrated	topic	true	false	[]
+amq.headers	headers	true	false	[]
+amq.match	headers	true	false	[]
+zenoss.events.statechange	direct	true	false	[]
+zenoss.zenevents	topic	true	false	[]
+zenoss.signals	direct	true	false	[]
+	direct	true	false	[]
+zenoss.zenevents.zep	topic	true	false	[]
+amq.topic	topic	true	false	[]
+zenoss.zenevents.raw	topic	true	false	[]
+zenoss.modelrequests	topic	true	false	[]
+amq.direct	direct	true	false	[]
+amq.fanout	fanout	true	false	[]
+zenoss.events.modelchange	direct	true	false	[]
+zenoss.events.impactchange	direct	true	false	[]
+__SPLIT__
+zenoss.queues.modelrequests.vmware	true	false	[]
+zenoss.queues.zep.migrated.summary	true	false	[]
+zenoss.queues.zep.migrated.archive	true	false	[]
+zenoss.queues.zep.rawevents	true	false	[]
+zenoss.queues.dsa.impactchange	true	false	[]
+zenoss.queues.zep.heartbeats	true	false	[]
+zenoss.queues.state.zenevents	true	false	[]
+zenoss.queues.dsa.statechange	true	false	[]
+zenoss.queues.zep.zenevents	true	false	[]
+zenoss.queues.zep.modelchange	true	false	[]
+zenoss.queues.impact.modelchange	true	false	[]
+__VHOST__

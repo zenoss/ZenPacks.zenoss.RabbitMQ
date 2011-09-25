@@ -1,0 +1,56 @@
+Status of node rabbit@maverick ...
+[{running_applications,[{rabbit,"RabbitMQ","1.8.0"},
+                        {os_mon,"CPO  CXC 138 46","2.2.4"},
+                        {sasl,"SASL  CXC 138 11","2.1.8"},
+                        {mnesia,"MNESIA  CXC 138 12","4.4.12"},
+                        {stdlib,"ERTS  CXC 138 10","1.16.4"},
+                        {kernel,"ERTS  CXC 138 10","2.13.4"}]},
+ {nodes,[rabbit@maverick]},
+ {running_nodes,[rabbit@maverick]}]
+...done.
+__COMMAND__
+VHOST: /
+__SPLIT__
+compute_fanout	fanout	false	false	[]
+network_fanout	fanout	false	false	[]
+amq.rabbitmq.log	topic	true	false	[]
+amq.match	headers	true	false	[]
+amq.headers	headers	true	false	[]
+scheduler_fanout	fanout	false	false	[]
+volume_fanout	fanout	false	false	[]
+amq.topic	topic	true	false	[]
+amq.direct	direct	true	false	[]
+amq.fanout	fanout	true	false	[]
+nova	topic	false	false	[]
+	direct	true	false	[]
+__SPLIT__
+volume_fanout_ac8c1df26766499ebf914ea70bcf2430	false	false	[]
+compute_fanout_f7ed7ca260d441ab8adf3aec91a2e5c7	false	false	[]
+volume.maverick	false	false	[]
+compute	false	false	[]
+compute.maverick	false	false	[]
+network.maverick	false	false	[]
+scheduler_fanout_172251c98be24cfe8c5f73ab9713d53e	false	false	[]
+scheduler.maverick	false	false	[]
+volume_fanout_3ab15847fa664c0f81b012ea51afea63	false	false	[]
+compute_fanout_673f4056b77b4ceea9ab0c505a30cd9b	false	false	[]
+compute_fanout_047967f8ccf44e23b6a2de7b44a8081d	false	false	[]
+scheduler_fanout_47dfd4257ca5421ab79fdc7a01510c1a	false	false	[]
+scheduler	false	false	[]
+network_fanout_d7446a602d844e278f168e0c3a163c77	false	false	[]
+scheduler_fanout_823bd7a7ab074f0996a98c4ee5c43033	false	false	[]
+network_fanout_0e60ccca9d244af4ac224d084b1e4a9f	false	false	[]
+network	false	false	[]
+volume	false	false	[]
+scheduler_fanout_45b45ad68d154b238f9be7163713cff5	false	false	[]
+__VHOST__
+VHOST: /testvhost
+__SPLIT__
+	direct	true	false	[]
+amq.direct	direct	true	false	[]
+amq.fanout	fanout	true	false	[]
+amq.match	headers	true	false	[]
+amq.topic	topic	true	false	[]
+amq.headers	headers	true	false	[]
+__SPLIT__
+__VHOST__

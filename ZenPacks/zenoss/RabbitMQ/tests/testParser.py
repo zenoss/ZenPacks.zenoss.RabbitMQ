@@ -12,7 +12,7 @@
 ###########################################################################
 
 from Products.ZenRRD.CommandParser import ParsedResults
-from Products.ZenRRD.zencommand import Cmd, DataPointConfig
+from Products.ZenRRD.zencommand import Cmd, DataPointConfig, DeviceConfig
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
 
 from ..parsers.RabbitMQCTL import RabbitMQCTL as RabbitMQCTLParser
@@ -32,6 +32,8 @@ class FakeCmdResult(object):
 class TestParser(BaseTestCase):
     def _getCmd(self, component, command, exitCode, output_filename, points):
         cmd = Cmd()
+        cmd.deviceConfig = DeviceConfig()
+        cmd.deviceConfig.device = 'maverick'
         cmd.component = component
         cmd.command = command
         cmd.eventClass = '/Status/RabbitMQ'

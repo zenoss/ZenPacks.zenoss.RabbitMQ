@@ -38,7 +38,7 @@ class TestParser(BaseTestCase):
         cmd.command = command
         cmd.eventClass = '/Status/RabbitMQ'
         cmd.eventKey = 'rabbitmq_node_status'
-        cmd.result = FakeCmdResult(0, loadData(output_filename))
+        cmd.result = FakeCmdResult(exitCode, loadData(output_filename))
         cmd.points = points
 
         return cmd
@@ -240,6 +240,16 @@ class TestParser(BaseTestCase):
         results = ParsedResults()
         parser.processResults(
             self._getStatusCmd(2, 'cmd_status_no_rabbitmqctl.txt'),
+            results)
+
+        self.assertEquals(len(results.values), 0)
+        self.assertEquals(len(results.events), 1)
+
+    def testStatus_unknownError(self):
+        parser = RabbitMQCTLParser()
+        results = ParsedResults()
+        parser.processResults(
+            self._getStatusCmd(2, 'cmd_status_unknown_error.txt'),
             results)
 
         self.assertEquals(len(results.values), 0)

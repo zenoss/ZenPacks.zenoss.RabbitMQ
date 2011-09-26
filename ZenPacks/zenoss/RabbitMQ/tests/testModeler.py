@@ -25,9 +25,6 @@ class TestModeler(BaseTestCase):
         self.d = self.dmd.Devices.createInstance('zenoss.RabbitMQ.testDevice')
         self.applyDataMap = ApplyDataMap()._applyDataMap
 
-        if zcml._initialized:
-            return
-
         # Required to prevent erroring out when trying to define viewlets in
         # ../browser/configure.zcml.
         import Products.ZenUI3.navigation

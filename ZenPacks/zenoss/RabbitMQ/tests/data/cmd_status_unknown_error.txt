@@ -1,0 +1,3 @@
+This is some error that I don't even know about. It probably wouldn't really
+look like this in reality. We hope that "rabbitmqctl status" would exit with a
+non-zero exit code in this circumstance.

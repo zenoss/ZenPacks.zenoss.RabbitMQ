@@ -26,9 +26,6 @@ class TestModel(BaseTestCase):
         self.d = self.dmd.Devices.createInstance('zenoss.RabbitMQ.testDevice')
         self.applyDataMap = ApplyDataMap()._applyDataMap
 
-        if zcml._initialized:
-            return
-
         # Required to prevent erroring out when trying to define viewlets in
         # ../browser/configure.zcml.
         import Products.ZenUI3.navigation
@@ -50,6 +47,7 @@ class TestModel(BaseTestCase):
         self.assertEquals(self.d.rabbitmq_nodes.countObjects(), 1)
 
         info = IInfo(self.d.rabbitmq_nodes()[0])
+        self.assertEquals(info.entity['name'], 'rabbit@dev1')
         self.assertEquals(info.vhostCount, 2)
         self.assertEquals(info.exchangeCount, 23)
         self.assertEquals(info.queueCount, 11)
@@ -62,6 +60,7 @@ class TestModel(BaseTestCase):
         self.assertEquals(node.rabbitmq_vhosts.countObjects(), 2)
 
         info = IInfo(node.rabbitmq_vhosts._getOb('-'))
+        self.assertEquals(info.entity['name'], '/')
         self.assertEquals(info.rabbitmq_node.name, 'rabbit@dev1')
         self.assertEquals(info.exchangeCount, 7)
         self.assertEquals(info.queueCount, 0)
@@ -74,6 +73,7 @@ class TestModel(BaseTestCase):
         exchange = vhost.rabbitmq_exchanges._getOb('amq.default')
 
         info = IInfo(exchange)
+        self.assertEquals(info.entity['name'], 'amq.default')
         self.assertEquals(info.rabbitmq_node.name, 'rabbit@dev1')
         self.assertEquals(info.rabbitmq_vhost.name, '/')
         self.assertEquals(info.exchange_type, 'direct')
@@ -87,8 +87,11 @@ class TestModel(BaseTestCase):
         node = self.d.rabbitmq_nodes()[0]
         vhost = node.rabbitmq_vhosts._getOb('zenoss')
         queue = vhost.rabbitmq_queues._getOb('zenoss.queues.zep.zenevents')
+        self.assertEquals(queue.rabbitmq_node_name, 'rabbit@dev1')
+        self.assertEquals(queue.rabbitmq_vhost_name, '/zenoss')
 
         info = IInfo(queue)
+        self.assertEquals(info.entity['name'], 'zenoss.queues.zep.zenevents')
         self.assertEquals(info.rabbitmq_node.name, 'rabbit@dev1')
         self.assertEquals(info.rabbitmq_vhost.name, '/zenoss')
         self.assertTrue(info.durable is True)

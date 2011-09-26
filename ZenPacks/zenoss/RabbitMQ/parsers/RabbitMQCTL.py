@@ -262,7 +262,7 @@ class RabbitMQCTL(CommandParser):
 
         return False
 
-    def getEvent(self, cmd, summary, message=None, component=None, clear=False):
+    def getEvent(self, cmd, summary, message=None, clear=False):
         event = dict(
             summary=summary,
             component=cmd.component,
@@ -272,11 +272,6 @@ class RabbitMQCTL(CommandParser):
 
         if message:
             event['message'] = message
-
-        if component is None:
-            event['component'] = cmd.component
-        else:
-            event['component'] = component
 
         if clear:
             event['severity'] = 0

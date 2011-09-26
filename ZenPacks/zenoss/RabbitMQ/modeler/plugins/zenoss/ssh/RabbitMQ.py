@@ -124,9 +124,6 @@ class RabbitMQ(CommandPlugin):
                 rel_maps.append(exchanges)
                 rel_maps.append(queues)
 
-        if len(object_maps) < 1:
-            LOG.info('No vhosts found on %s', device.id)
-
         return [RelationshipMap(
             compname=compname,
             relname='rabbitmq_vhosts',

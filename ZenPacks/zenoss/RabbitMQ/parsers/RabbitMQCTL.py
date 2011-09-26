@@ -104,10 +104,19 @@ class RabbitMQCTL(CommandParser):
                 sendQueue=int(fields[6]),
                 )
 
-        if len(connections.keys()) < 1:
-            return
-
         dp_map = dict([(dp.id, dp) for dp in cmd.points])
+
+        gauge_metrics = ('connections', 'channels', 'sendQueue')
+        delta_metrics = ('recvBytes', 'recvCount', 'sendBytes', 'sendCount')
+
+        # Rather than not record data when no connections are open we need to
+        # records zeros.
+        if len(connections.keys()) < 1:
+            for metric in gauge_metrics + delta_metrics:
+                if metric in dp_map:
+                    result.values.append((dp_map[metric], 0))
+
+            return
 
         # Metrics that don't require getting a difference since the last
         # collection.
@@ -129,9 +138,8 @@ class RabbitMQCTL(CommandParser):
         # collection we need to break it down by individual connection.
         # Otherwise we'd get bad data as connections come and go.
         deltas = {}
-        delta_fields = ('recvBytes', 'recvCount', 'sendBytes', 'sendCount')
-        for field in delta_fields:
-            deltas[field] = 0
+        for metric in delta_metrics:
+            deltas[metric] = 0
 
         data_keys = [cmd.deviceConfig.device, cmd.component, 'connections']
         old = loadData(data_keys) or {}
@@ -139,22 +147,22 @@ class RabbitMQCTL(CommandParser):
 
         # Start by calculating deltas for PIDs that have a previous value.
         for pid in set(connections.keys()) & set(old.keys()):
-            for field in delta_fields:
-                delta = connections[pid][field] - old[pid][field]
+            for metric in delta_metrics:
+                delta = connections[pid][metric] - old[pid][metric]
                 if delta < 0:
-                    delta = connections[pid][field]
+                    delta = connections[pid][metric]
 
-                deltas[field] += delta
+                deltas[metric] += delta
 
         # For new PIDs we can use the current value as the delta.
         for pid in set(connections.keys()) - set(old.keys()):
-            for field in delta_fields:
-                deltas[field] += connections[pid][field]
+            for metric in delta_metrics:
+                deltas[metric] += connections[pid][metric]
 
-        for field in delta_fields:
-            if field in dp_map:
+        for field in delta_metrics:
+            if metric in dp_map:
                 result.values.append((
-                    dp_map[field], deltas[field]))
+                    dp_map[metric], deltas[metric]))
 
     def processListChannelsResults(self, cmd, result):
         channels = {}
@@ -175,25 +183,24 @@ class RabbitMQCTL(CommandParser):
                 uncommitted=int(fields[3]),
                 )
 
-        if len(channels.keys()) < 1:
-            return
-
         dp_map = dict([(dp.id, dp) for dp in cmd.points])
 
-        if 'consumers' in dp_map:
-            result.values.append((dp_map['consumers'], reduce(
-                lambda x, y: x + y,
-                (x['consumers'] for x in channels.values()))))
+        metrics = ('consumers', 'unacknowledged', 'uncommitted')
 
-        if 'unacknowledged' in dp_map:
-            result.values.append((dp_map['unacknowledged'], reduce(
-                lambda x, y: x + y,
-                (x['unacknowledged'] for x in channels.values()))))
+        # Rather than not record data when no connections are open we need to
+        # records zeros.
+        if len(channels.keys()) < 1:
+            for metric in metrics:
+                if metric in dp_map:
+                    result.values.append((dp_map[metric], 0))
 
-        if 'uncommitted' in dp_map:
-            result.values.append((dp_map['uncommitted'], reduce(
-                lambda x, y: x + y,
-                (x['uncommitted'] for x in channels.values()))))
+            return
+
+        for metric in metrics:
+            if metric in dp_map:
+                result.values.append((dp_map[metric], reduce(
+                    lambda x, y: x + y,
+                    (x[metric] for x in channels.values()))))
 
     def processListQueuesResults(self, cmd, result):
         queues = {}

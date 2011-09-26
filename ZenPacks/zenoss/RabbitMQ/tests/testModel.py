@@ -8,28 +8,20 @@
 import logging
 log = logging.getLogger('zen.RabbitMQ')
 
-import os
-
 from Products.Five import zcml
 
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
-from Products.ZenUtils.Utils import unused
 from Products.Zuul.interfaces.info import IInfo
 
 from ..modeler.plugins.zenoss.ssh.RabbitMQ import RabbitMQ as RabbitMQModeler
 
-
-def loadData(filename):
-    f = open(os.path.join(os.path.dirname(__file__), 'data', filename), 'r')
-    data = f.read()
-    f.close()
-    return data
+from .util import loadData
 
 
-class TestCode(BaseTestCase):
+class TestModel(BaseTestCase):
     def afterSetUp(self):
-        super(TestCode, self).afterSetUp()
+        super(TestModel, self).afterSetUp()
 
         self.d = self.dmd.Devices.createInstance('zenoss.RabbitMQ.testDevice')
         self.applyDataMap = ApplyDataMap()._applyDataMap
@@ -44,34 +36,6 @@ class TestCode(BaseTestCase):
 
         import ZenPacks.zenoss.RabbitMQ
         zcml.load_config('configure.zcml', ZenPacks.zenoss.RabbitMQ)
-
-    def testModeler_rabbitmqctlNotFound(self):
-        modeler = RabbitMQModeler()
-        modeler_results = loadData('model_no_rabbitmqctl.txt')
-        data_maps = modeler.process(self.d, modeler_results, log)
-
-        self.assertEquals(data_maps, None)
-
-    def testModeler_notRunning(self):
-        modeler = RabbitMQModeler()
-        modeler_results = loadData('model_not_running.txt')
-        data_maps = modeler.process(self.d, modeler_results, log)
-
-        self.assertEquals(data_maps, None)
-
-    def testModeler_runningZenoss(self):
-        modeler = RabbitMQModeler()
-        modeler_results = loadData('model_running_zenoss.txt')
-        data_maps = modeler.process(self.d, modeler_results, log)
-
-        self.assertEquals(len(data_maps), 6)
-
-    def testModeler_runningOpenStack(self):
-        modeler = RabbitMQModeler()
-        modeler_results = loadData('model_running_openstack.txt')
-        data_maps = modeler.process(self.d, modeler_results, log)
-
-        self.assertEquals(len(data_maps), 6)
 
     def _loadZenossData(self):
         modeler = RabbitMQModeler()
@@ -131,20 +95,9 @@ class TestCode(BaseTestCase):
         self.assertTrue(info.auto_delete is False)
         self.assertEquals(info.arguments, '[]')
 
-    def testRabbitMQCTLParser(self):
-        try:
-            import ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQCTL
-            unused(ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQCTL)
-        except ImportError:
-            self.assertTrue(False, "Can't import RabbitMQCTL parser")
-
-        # Need to build a test for this. Right now it's just a TODO.
-        self.assertTrue(False,
-            "Channels and connections returning nothing instead of 0")
-
 
 def test_suite():
     from unittest import TestSuite, makeSuite
     suite = TestSuite()
-    suite.addTest(makeSuite(TestCode))
+    suite.addTest(makeSuite(TestModel))
     return suite

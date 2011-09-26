@@ -1,0 +1,8 @@
+[{running_applications,[{rabbit,"RabbitMQ","2.2.0"},
+                        {os_mon,"CPO  CXC 138 46","2.1.8"},
+                        {sasl,"SASL  CXC 138 11","2.1.5.4"},
+                        {mnesia,"MNESIA  CXC 138 12","4.4.7"},
+                        {stdlib,"ERTS  CXC 138 10","1.15.5"},
+                        {kernel,"ERTS  CXC 138 10","2.12.5"}]},
+ {nodes,[{disc,[rabbit@dev1]}]},
+ {running_nodes,[rabbit@dev1]}]

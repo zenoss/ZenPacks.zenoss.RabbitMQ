@@ -1,0 +1,6 @@
+Error: unable to connect to node rabbit@dev1: nodedown
+diagnostics:
+- nodes and their ports on dev1: [{rabbitmqctl12620,41271}]
+- current node: rabbitmqctl12620@dev1
+- current node home dir: /var/lib/rabbitmq
+- current node cookie hash: MfDK8aFkOgDrOCoiAypWPQ==

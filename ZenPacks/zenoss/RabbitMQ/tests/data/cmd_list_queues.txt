@@ -1,0 +1,11 @@
+zenoss.queues.modelrequests.vmware      0       0       0       0       34592
+zenoss.queues.zep.migrated.summary      0       0       0       0       34592
+zenoss.queues.zep.migrated.archive      0       0       0       0       34592
+zenoss.queues.zep.rawevents     8       0       8       0       34592
+zenoss.queues.dsa.impactchange  0       0       0       0       34592
+zenoss.queues.zep.heartbeats    0       0       0       0       34592
+zenoss.queues.state.zenevents   0       0       0       0       34592
+zenoss.queues.dsa.statechange   0       0       0       0       34592
+zenoss.queues.zep.zenevents     0       0       0       0       34592
+zenoss.queues.zep.modelchange   0       0       0       0       34592
+zenoss.queues.impact.modelchange        0       0       0       0       34592

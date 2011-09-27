@@ -130,7 +130,7 @@ management API plugin in addition to the SSH method.
 
 
 [Zenoss]: <http://www.zenoss.com/>
-[Monitoring RabbitMQ]: <http://youtube.com/watch=?v=TODO>
+[Monitoring RabbitMQ]: <http://www.youtube.com/watch?v=CAak2ayFcV0>
 [Latest Package for Python 2.6]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.RabbitMQ/ZenPacks.zenoss.RabbitMQ-0.7.0-py2.6.egg>
 
 [ZenPacks.dnalley.AMQPEventMonitor]: <http://community.zenoss.org/docs/DOC-5817>

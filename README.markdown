@@ -125,5 +125,5 @@ management API plugin in addition to the SSH method.
 
 [ZenPacks.dnalley.AMQPEventMonitor]: <http://community.zenoss.org/docs/DOC-5817>
 [David Nalley]: <http://community.zenoss.org/people/ke4qqq>
-[ZenPacks.community.RabbitmMQ]: <https://github.com/g-k/ZenPacks.community.RabbitMQ>
+[ZenPacks.community.RabbitMQ]: <https://github.com/g-k/ZenPacks.community.RabbitMQ>
 [Greg Guthe]: <https://github.com/g-k>

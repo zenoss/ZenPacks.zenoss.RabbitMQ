@@ -210,7 +210,6 @@ ZC.RabbitMQExchangePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 {name: 'exchange_type'},
                 {name: 'durable'},
                 {name: 'auto_delete'},
-                {name: 'arguments'},
                 {name: 'monitor'},
                 {name: 'monitored'}
             ],
@@ -260,12 +259,6 @@ ZC.RabbitMQExchangePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 sortable: true,
                 width: 70
             },{
-                id: 'arguments',
-                dataIndex: 'arguments',
-                header: _t('Arguments'),
-                sortable: true,
-                width: 80
-            },{
                 id: 'monitored',
                 dataIndex: 'monitored',
                 header: _t('Monitored'),
@@ -294,7 +287,7 @@ ZC.RabbitMQQueuePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 {name: 'rabbitmq_vhost'},
                 {name: 'durable'},
                 {name: 'auto_delete'},
-                {name: 'arguments'},
+                {name: 'threshold_messages_max'},
                 {name: 'monitor'},
                 {name: 'monitored'}
             ],
@@ -338,11 +331,11 @@ ZC.RabbitMQQueuePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 sortable: true,
                 width: 70
             },{
-                id: 'arguments',
-                dataIndex: 'arguments',
-                header: _t('Arguments'),
+                id: 'threshold_messages_max',
+                dataIndex: 'threshold_messages_max',
+                header: _t('Threshold'),
                 sortable: true,
-                width: 80
+                width: 70
             },{
                 id: 'monitored',
                 dataIndex: 'monitored',

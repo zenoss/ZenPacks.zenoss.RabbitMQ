@@ -19,14 +19,19 @@ from .RabbitMQComponent import RabbitMQComponent
 class RabbitMQQueue(RabbitMQComponent):
     meta_type = portal_type = "RabbitMQQueue"
 
+    # Modeled attributes.
     durable = None
     auto_delete = None
     arguments = None
+
+    # Managed attributes.
+    threshold_messages_max = None
 
     _properties = RabbitMQComponent._properties + (
         {'id': 'durable', 'type': 'boolean', 'mode': 'w'},
         {'id': 'auto_delete', 'type': 'boolean', 'mode': 'w'},
         {'id': 'arguments', 'type': 'string', 'mode': 'w'},
+        {'id': 'threshold_messages_max', 'type': 'int', 'mode': 'w'},
         )
 
     _relations = RabbitMQComponent._relations + (

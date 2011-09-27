@@ -100,6 +100,17 @@ class RabbitMQQueueInfo(RabbitMQComponentInfo):
     arguments = ProxyProperty('arguments')
 
     @property
+    def threshold_messages_max(self):
+        return self._object.threshold_messages_max
+
+    @threshold_messages_max.setter
+    def threshold_messages_max(self, value):
+        if value is None or value is '':
+            self._object.threshold_messages_max = None
+        else:
+            self._object.threshold_messages_max = int(value)
+
+    @property
     @info
     def rabbitmq_node(self):
         return self._object.rabbitmq_vhost().rabbitmq_node()

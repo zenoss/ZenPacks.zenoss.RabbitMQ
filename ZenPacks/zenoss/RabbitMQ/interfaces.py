@@ -61,3 +61,7 @@ class IRabbitMQQueueInfo(IComponentInfo):
     durable = schema.Bool(title=_t("Durable"))
     auto_delete = schema.Bool(title=_t("Auto-Delete"))
     arguments = SingleLineText(title=_t(u"Arguments"))
+
+    threshold_messages_max = schema.Int(
+        title=_t(u"Threshold - Messages (Maximum)"),
+        alwaysEditable=True)

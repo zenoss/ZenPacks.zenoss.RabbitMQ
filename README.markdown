@@ -1,20 +1,129 @@
 # ZenPacks.zenoss.RabbitMQ
-This is a currently a work in progress. I'll update this README when there's
-something worth saying in it.
+This project is a [Zenoss][] extension (ZenPack) that allows for monitoring of
+RabbitMQ. See the Usage section for details on what is monitored. You can watch
+the [Monitoring RabbitMQ][] video for a quick introduction that covers most of
+the details below.
 
-## What already exists?
-Why am I creating this when g-k has already created a community RabbitMQ
-ZenPack?
+## Requirements & Dependencies
+This ZenPack is known to be compatible with Zenoss versions 3.2 through 4.0.
+There's a high likelihood that it is also compatible with any Zenoss 3.0 and
+3.1 also, but these have not yet been tested.
 
-1. I don't want to install SNMP extensions for RabbitMQ.
-2. I don't want to install the HTTP API management extension for RabbitMQ.
+## Installation
+You must first have, or install, Zenoss 3.2.0 or later. Core and Enterprise
+versions are supported. You can download the free Core version of Zenoss from
+<http://community.zenoss.org/community/download>.
 
-Actually the HTTP API management extension is nice. I would like to support
-them in the future to get the message rate metrics.
+### Normal Installation (packaged egg)
+Depending on what version of Zenoss you're running you will need a different
+package. Download the appropriate package for your Zenoss version from the list
+below.
 
-## What will it do?
-My functionality goals are..
+ * Zenoss 4.1 - ???: Not yet available.
+ * Zenoss 3.0 - 4.0: [Latest Package for Python 2.6][]
 
-* Model vhosts, exchanges and queues.
-* Monitor queued messages, consumers, messages and things like that.
+Then copy it to your Zenoss server and run the following commands as the zenoss
+user.
 
+    zenpack --install <package.egg>
+    zenoss restart
+
+### Developer Installation (link mode)
+If you wish to further develop and possibly contribute back to the RabbitMQ
+ZenPack you should clone the git repository, then install the ZenPack in
+developer mode using the following commands.
+
+    git clone git://github.com/zenoss/ZenPacks.zenoss.RabbitMQ.git
+    zenpack --link --install ZenPacks.zenoss.RabbitMQ
+    zenoss restart
+
+## Usage
+Install the ZenPack will add the following objects to your Zenoss system.
+
+ * Modeling Plugins
+  * zenoss.ssh.RabbitMQ
+ * Monitoring Templates
+  * RabbitMQNode in /Devices
+  * RabbitMQQueue in /Devices
+ * Event Classes
+  * /Status/RabbitMQ
+  * /Perf/RabbitMQ
+ * Command Parsers
+  * ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQCTL
+
+These monitoring templates should not be bound directly to any devices in the
+system.
+
+To start monitoring your RabbitMQ server you will need to setup SSH access so
+that your Zenoss collector server will be able to SSH into your RabbitMQ
+server(s) as a user who has permission to run the `rabbitmqctl` command. To do
+this you need to set the following zProperties for the RabbitMQ devices or
+their device class in Zenoss.
+
+ * zCommandUsername
+ * zCommandPassword
+ * zKeyPath
+
+The zCommandUsername property must be set. To use public key authentication you
+must verify that the public portion of the key referenced in zKeyPath is
+installed in the `~/.ssh/authorized_keys` file for the appropriate user on the
+RabbitMQ server. If this key has a passphrase you should set it in the
+zCommandPassword property. If you'd rather use password authentication than
+setup keys, simply put the user's password in the zCommandPassword property.
+
+You should then add the zenoss.ssh.RabbitMQ modeler plugin to the device, or
+device class containing your RabbitMQ servers and remodel the device(s). This
+will automatically find the node, vhosts, exchanges and queues and begin
+monitoring them immediately for the following metrics.
+
+ * Node Values
+  * Status - Running or not? Generates event on failure.
+  * Open Connections & Channels
+  * Sent & Received Bytes Rate
+  * Sent & Received Messages Rate
+  * Depth of Send Queue
+  * Consumers
+  * Unacknowledged & Uncommitted Messages
+ * Queue Values
+  * Ready, Unacknowledged & Total Messages
+  * Memory Usage
+  * Consumers
+
+There is a default threshold of 1,000,000 messages per queue. This is almost
+certainly an absurdly high threshold that shouldn't trip in normal systems.
+However, by clicking into the details of any individual queue you can set the
+per-queue threshold to a more reasonable value that makes sense for a given
+queue.
+
+## Related ZenPacks
+There already exist at least two community Zenpacks that provide monitoring for
+RabbitMQ.
+
+ * [ZenPacks.dnalley.AMQPEventMonitor][] by [David Nalley][]: Very different
+   functionality than what's provided by this ZenPack. It allows you to pull
+   messages from a defined queue and automatically turn them into Zenoss
+   events.
+ * [ZenPacks.community.RabbitMQ][] by [Greg Guthe][]: More similar to this
+   ZenPack in its functionality. Global metrics for queued messages and rates.
+   It appears to require that the HTTP management API plugin be installed into
+   your RabbitMQ instances, and that a Net-SNMP extension also written by
+   [Greg Guthe][] be installed.
+
+The major differences between the [ZenPacks.community.RabbitMQ][] and this pack
+are that this pack simply runs various rabbitmqctl commands over SSH both to
+model the node, vhosts, exchanges and queues; as well as to monitor connection,
+channel and per-queue metrics. So you don't need to install anything extra on
+your RabbitMQ server, and you get more granularity on the monitoring.
+
+In the future this pack might be extended to also support RabbitMQ's HTTP
+management API plugin in addition to the SSH method.
+
+
+[Zenoss]: <http://www.zenoss.com/>
+[Monitoring RabbitMQ]: <http://youtube.com/watch=?v=TODO>
+[Latest Package for Python 2.6]: <https://github.com/downloads/zenoss/ZenPacks.zenoss.RabbitMQ/ZenPacks.zenoss.RabbitMQ-0.7.0-py2.6.egg>
+
+[ZenPacks.dnalley.AMQPEventMonitor]: <http://community.zenoss.org/docs/DOC-5817>
+[David Nalley]: <http://community.zenoss.org/people/ke4qqq>
+[ZenPacks.community.RabbitmMQ]: <https://github.com/g-k/ZenPacks.community.RabbitMQ>
+[Greg Guthe]: <https://github.com/g-k>

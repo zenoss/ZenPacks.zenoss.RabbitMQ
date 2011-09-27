@@ -118,6 +118,16 @@ your RabbitMQ server, and you get more granularity on the monitoring.
 In the future this pack might be extended to also support RabbitMQ's HTTP
 management API plugin in addition to the SSH method.
 
+## Screenshots
+![Components](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/components.png)
+![Nodes](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/nodes.png)
+![Node Throughput](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/nodes_throughput.png)
+![Node Channels](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/nodes_channels.png)
+![VHosts](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/vhosts.png)
+![Exchanges](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/exchanges.png)
+![Queues](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/queues.png)
+![Queue Metrics](https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/queues_metrics.png)
+
 
 [Zenoss]: <http://www.zenoss.com/>
 [Monitoring RabbitMQ]: <http://youtube.com/watch=?v=TODO>

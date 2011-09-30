@@ -38,7 +38,7 @@ developer mode using the following commands.
     zenoss restart
 
 ## Usage
-Install the ZenPack will add the following objects to your Zenoss system.
+Installing the ZenPack will add the following objects to your Zenoss system.
 
  * Modeling Plugins
   * zenoss.ssh.RabbitMQ

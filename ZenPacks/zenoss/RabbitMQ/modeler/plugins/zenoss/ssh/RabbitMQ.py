@@ -54,11 +54,11 @@ class RabbitMQ(CommandPlugin):
         for line in command_strings[0].split('\n'):
             match = re.search(r'Status of node (\S+)\s', line)
             if match:
-                node_title = match.group(1)
+                node_title = match.group(1).strip("'")
                 node_id = prepId(node_title)
                 nodes.append(ObjectMap(data={
                     'id': node_id,
-                    'title': match.group(1),
+                    'title': node_title,
                     }))
 
                 continue

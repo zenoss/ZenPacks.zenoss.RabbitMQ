@@ -19,6 +19,7 @@ executed at startup time in all Zope clients.
 import logging
 log = logging.getLogger('zen.RabbitMQ')
 
+from Products.ZenEvents.EventManagerBase import EventManagerBase
 from Products.ZenModel.Device import Device
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
 from Products.ZenRelations.RelSchema import ToManyCont, ToOne
@@ -61,3 +62,9 @@ class ZenPack(ZenPackBase):
         log.info("Rebuilding relations for existing devices")
         for d in self.dmd.Devices.getSubDevicesGen():
             d.buildRelations()
+
+
+# We need to filter CloudStack components by id instead of name.
+EventManagerBase.ComponentIdWhere = (
+    "\"(device = '%s' and component = '%s')\""
+    " % (me.device().getDmdKey(), me.id)")

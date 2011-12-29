@@ -51,7 +51,7 @@ class ZenPack(ZenPackBase):
 
     def remove(self, app, leaveObjects=False):
         if not leaveObjects:
-            # Remote our Device relations additions.
+            # Remove our Device relations additions.
             Device._relations = tuple(
                 [x for x in Device._relations \
                     if x[0] not in NEW_DEVICE_RELATIONS])
@@ -64,7 +64,7 @@ class ZenPack(ZenPackBase):
             d.buildRelations()
 
 
-# We need to filter CloudStack components by id instead of name.
+# We need to filter RabbitMQ components by id instead of name.
 EventManagerBase.ComponentIdWhere = (
     "\"(device = '%s' and component = '%s')\""
     " % (me.device().getDmdKey(), me.id)")

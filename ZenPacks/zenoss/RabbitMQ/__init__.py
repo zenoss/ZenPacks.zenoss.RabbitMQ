@@ -19,10 +19,16 @@ executed at startup time in all Zope clients.
 import logging
 log = logging.getLogger('zen.RabbitMQ')
 
+import Globals
+
 from Products.ZenEvents.EventManagerBase import EventManagerBase
 from Products.ZenModel.Device import Device
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
 from Products.ZenRelations.RelSchema import ToManyCont, ToOne
+from Products.ZenUtils.Utils import unused
+
+unused(Globals)
+
 
 ZENPACK_NAME = 'ZenPacks.zenoss.RabbitMQ'
 

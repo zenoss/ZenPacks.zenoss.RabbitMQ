@@ -12,7 +12,7 @@
 ###########################################################################
 
 from Products.ZenRRD.CommandParser import ParsedResults
-from Products.ZenRRD.zencommand import Cmd, DataPointConfig, DeviceConfig
+from Products.ZenRRD.zencommand import Cmd, DataPointConfig
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
 
 from ..parsers.RabbitMQCTL import RabbitMQCTL as RabbitMQCTLParser
@@ -32,7 +32,15 @@ class FakeCmdResult(object):
 class TestParser(BaseTestCase):
     def _getCmd(self, component, command, exitCode, output_filename, points):
         cmd = Cmd()
-        cmd.deviceConfig = DeviceConfig()
+
+        # DeviceConfig no longer exists as of Zenoss 4.
+        try:
+            from Products.ZenRRD.zencommand import DeviceConfig
+            cmd.deviceConfig = DeviceConfig()
+        except ImportError:
+            from Products.ZenCollector.services.config import DeviceProxy
+            cmd.deviceConfig = DeviceProxy()
+
         cmd.deviceConfig.device = 'maverick'
         cmd.component = component
         cmd.command = command

@@ -36,7 +36,7 @@ class RabbitMQQueue(RabbitMQComponent):
 
     _relations = RabbitMQComponent._relations + (
         ('rabbitmq_vhost', ToOne(ToManyCont,
-            'ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQVHost',
+            'ZenPacks.zenoss.RabbitMQ.RabbitMQVHost.RabbitMQVHost',
             'rabbitmq_queues',
             ),),
         )

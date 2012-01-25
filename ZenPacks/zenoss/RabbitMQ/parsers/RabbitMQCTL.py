@@ -159,7 +159,7 @@ class RabbitMQCTL(CommandParser):
             for metric in delta_metrics:
                 deltas[metric] += connections[pid][metric]
 
-        for field in delta_metrics:
+        for metric in delta_metrics:
             if metric in dp_map:
                 result.values.append((
                     dp_map[metric], deltas[metric]))

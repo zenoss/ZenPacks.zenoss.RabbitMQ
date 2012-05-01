@@ -52,8 +52,22 @@ class ZenPack(ZenPackBase):
     """
 
     def install(self, app):
+        self.pre_install(app)
         super(ZenPack, self).install(app)
         self._buildDeviceRelations()
+
+    def pre_install(self, app):
+        # Remove the "Throughput - Messages" graph so it can be replaced with
+        # the proper packets graph from objects.xml.
+        node_template = app.zport.dmd.Devices.rrdTemplates._getOb(
+            'RabbitMQNode', None)
+
+        if node_template:
+            messages_graph = node_template.graphDefs._getOb(
+                'Throughput - Messages', None)
+
+            if messages_graph:
+                node_template.graphDefs._delObject(messages_graph.id)
 
     def remove(self, app, leaveObjects=False):
         if not leaveObjects:

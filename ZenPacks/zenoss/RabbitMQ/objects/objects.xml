@@ -314,6 +314,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='Consumers' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -424,6 +427,9 @@ False
 <property type="boolean" id="hasSummary" mode="w" >
 True
 </property>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <tomanycont id='graphPoints'>
 <object id='Channels' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
@@ -455,6 +461,9 @@ AVERAGE
 </property>
 </object>
 <object id='Connections' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -512,6 +521,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='Queue' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -598,6 +610,9 @@ AVERAGE
 </property>
 </object>
 <object id='Sent' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -625,7 +640,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Throughput - Messages' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='Throughput - Packets' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
@@ -633,7 +648,7 @@ AVERAGE
 500
 </property>
 <property type="string" id="units" mode="w" >
-messages/sec
+packets/sec
 </property>
 <property type="boolean" id="log" mode="w" >
 False
@@ -684,6 +699,9 @@ AVERAGE
 </property>
 </object>
 <object id='Sent' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -898,6 +916,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='Consumers' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 LINE
 </property>
@@ -955,6 +976,9 @@ True
 </property>
 <tomanycont id='graphPoints'>
 <object id='Used' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
 AREA
 </property>
@@ -1007,6 +1031,9 @@ False
 <property type="boolean" id="hasSummary" mode="w" >
 True
 </property>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <tomanycont id='graphPoints'>
 <object id='Ready' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
 <property type="long" id="sequence" mode="w" >
@@ -1038,6 +1065,9 @@ AVERAGE
 </property>
 </object>
 <object id='Threshold - Messages (Max)' module='Products.ZenModel.ThresholdGraphPoint' class='ThresholdGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
 <property type="string" id="threshId" mode="w" >
 queue size
 </property>

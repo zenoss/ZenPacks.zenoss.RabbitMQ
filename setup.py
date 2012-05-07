@@ -5,7 +5,7 @@
 NAME = "ZenPacks.zenoss.RabbitMQ"
 VERSION = "1.0.1"
 AUTHOR = "Zenoss Labs"
-LICENSE = ""
+LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = ['ZenPacks', 'ZenPacks.zenoss', 'ZenPacks.zenoss.RabbitMQ']
 INSTALL_REQUIRES = []

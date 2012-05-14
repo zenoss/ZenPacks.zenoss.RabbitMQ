@@ -23,9 +23,11 @@ Zenoss.types.register({
 
 Ext.apply(Zenoss.render, {
     entityLinkFromGrid: function(obj) {
+        // Compatibility fix for ExtJS3 or 4.
+        var fmt = Ext.isDefined(Ext.String) ? Ext.String.format : String.format;
         if (obj && obj.uid && obj.name) {
             if ( !this.panel || this.panel.subComponentGridPanel) {
-                return String.format(
+                return fmt(
                     '<a href="javascript:Ext.getCmp(\'component_card\').componentgrid.jumpToEntity(\'{0}\', \'{1}\');">{1}</a>',
                     obj.uid, obj.name);
             } else {

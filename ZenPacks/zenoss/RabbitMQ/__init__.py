@@ -26,6 +26,7 @@ from Products.ZenModel.Device import Device
 from Products.ZenModel.ZenPack import ZenPack as ZenPackBase
 from Products.ZenRelations.RelSchema import ToManyCont, ToOne
 from Products.ZenUtils.Utils import unused
+from Products.Zuul.interfaces import ICatalogTool
 
 unused(Globals)
 
@@ -35,6 +36,10 @@ ZENPACK_NAME = 'ZenPacks.zenoss.RabbitMQ'
 # Define new device relations.
 NEW_DEVICE_RELATIONS = (
     ('rabbitmq_nodes', 'RabbitMQNode'),
+    )
+
+NEW_COMPONENT_TYPES = (
+    'ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQNode',
     )
 
 # Add new relationships to Device if they don't already exist.
@@ -54,6 +59,8 @@ class ZenPack(ZenPackBase):
     def install(self, app):
         self.pre_install(app)
         super(ZenPack, self).install(app)
+
+        log.info('Adding RabbitMQ relationships to existing devices')
         self._buildDeviceRelations()
 
     def pre_install(self, app):
@@ -71,15 +78,23 @@ class ZenPack(ZenPackBase):
 
     def remove(self, app, leaveObjects=False):
         if not leaveObjects:
+            log.info('Removing RabbitMQ components')
+            cat = ICatalogTool(app.zport.dmd)
+            for brain in cat.search(types=NEW_COMPONENT_TYPES):
+                component = brain.getObject()
+                component.getPrimaryParent()._delObject(component.id)
+
             # Remove our Device relations additions.
             Device._relations = tuple(
                 [x for x in Device._relations \
                     if x[0] not in NEW_DEVICE_RELATIONS])
 
+            log.info('Removing RabbitMQ device relationships')
             self._buildDeviceRelations()
 
+        super(ZenPack, self).remove(app, leaveObjects=leaveObjects)
+
     def _buildDeviceRelations(self):
-        log.info("Rebuilding relations for existing devices")
         for d in self.dmd.Devices.getSubDevicesGen():
             d.buildRelations()
 

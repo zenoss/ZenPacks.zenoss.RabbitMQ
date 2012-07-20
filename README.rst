@@ -179,7 +179,7 @@ Assuming that you've created a user named *zenoss* on your RabbitMQ servers for
 monitoring purposes, you can follow these steps to allow the *zenoss* user to
 run ``rabbitmqctl``.
 
-1. Copy RabbitMQ's Erlang cookie to the *zenoss* user's home directory::
+1. Copy RabbitMQ's Erlang cookie to the *zenoss* user's home directory.
 
    .. sourcecode:: bash
 

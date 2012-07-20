@@ -104,7 +104,9 @@ system.
 
 To start monitoring your RabbitMQ server you will need to setup SSH access so
 that your Zenoss collector server will be able to SSH into your RabbitMQ
-server(s) as a user who has permission to run the `rabbitmqctl` command. To do
+server(s) as a user who has permission to run the ``rabbitmqctl`` command. This
+almost always means the root user. See the *Using a Non-Root User* section
+below for instructions on allowing non-root users to run ``rabbitmqctl``. To do
 this you need to set the following zProperties for the RabbitMQ devices or
 their device class in Zenoss.
 
@@ -145,6 +147,53 @@ certainly an absurdly high threshold that shouldn't trip in normal systems.
 However, by clicking into the details of any individual queue you can set the
 per-queue threshold to a more reasonable value that makes sense for a given
 queue.
+
+
+Using a Non-Root User
+-------------------------------------------------------------------------------
+
+This ZenPack requires the ability to run the ``rabbitmqctl`` command remotely
+on your RabbitMQ server(s) using SSH. By default, the ``rabbitmqctl`` command
+is only allowed to be run by the *root* and *rabbitmq* users. Furthermore, this
+ZenPack expects the ``rabbitmqctl`` command be in the user's path. Normally
+this is only true for the root user.
+
+Assuming that you've created a user named *zenoss* on your RabbitMQ servers for
+monitoring purposes, you can follow these steps to allow the *zenoss* user to
+run ``rabbitmqctl``.
+
+1. Copy RabbitMQ's Erlang cookie to the *zenoss* user's home directory.
+
+   .. sourcecode:: bash
+
+      su -
+      cp /var/lib/rabbitmq/.erlang-cookie /home/zenoss
+      chown zenoss:zenoss /home/zenoss/.erlang-cookie
+      chmod 0400 /home/zenoss/.erlang-cookie
+
+2. Add ``/usr/sbin`` to the *zenoss* user's path.
+
+   .. sourcecode:: bash
+
+      echo 'export PATH="$PATH:/usr/sbin"' >> /home/zenoss/.bashrc
+
+
+.. warning::
+
+   There's a very good reason for this restriction. Once a user is allowed to
+   execute the ``rabbitmqctl`` command, they are able to perform the following
+   actions.
+
+   - Stop, Start or Reset RabbitMQ
+   - Control a RabbitMQ Cluster
+   - Close Open Connections
+   - Manage Users and Security
+   - Manage VHosts
+
+   In a nutshell, this means that any user with permission to run
+   ``rabbitmqctl`` can wreak total havoc on your RabbitMQ server if they had
+   the intent to do so.
+
 
 
 Screenshots

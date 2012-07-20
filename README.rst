@@ -158,26 +158,6 @@ is only allowed to be run by the *root* and *rabbitmq* users. Furthermore, this
 ZenPack expects the ``rabbitmqctl`` command be in the user's path. Normally
 this is only true for the root user.
 
-Assuming that you've created a user named *zenoss* on your RabbitMQ servers for
-monitoring purposes, you can follow these steps to allow the *zenoss* user to
-run ``rabbitmqctl``.
-
-1. Copy RabbitMQ's Erlang cookie to the *zenoss* user's home directory.
-
-   .. sourcecode:: bash
-
-      su -
-      cp /var/lib/rabbitmq/.erlang-cookie /home/zenoss
-      chown zenoss:zenoss /home/zenoss/.erlang-cookie
-      chmod 0400 /home/zenoss/.erlang-cookie
-
-2. Add ``/usr/sbin`` to the *zenoss* user's path.
-
-   .. sourcecode:: bash
-
-      echo 'export PATH="$PATH:/usr/sbin"' >> /home/zenoss/.bashrc
-
-
 .. warning::
 
    There's a very good reason for this restriction. Once a user is allowed to
@@ -194,6 +174,25 @@ run ``rabbitmqctl``.
    ``rabbitmqctl`` can wreak total havoc on your RabbitMQ server if they had
    the intent to do so.
 
+
+Assuming that you've created a user named *zenoss* on your RabbitMQ servers for
+monitoring purposes, you can follow these steps to allow the *zenoss* user to
+run ``rabbitmqctl``.
+
+1. Copy RabbitMQ's Erlang cookie to the *zenoss* user's home directory::
+
+   .. sourcecode:: bash
+
+      su -
+      cp /var/lib/rabbitmq/.erlang-cookie /home/zenoss
+      chown zenoss:zenoss /home/zenoss/.erlang-cookie
+      chmod 0400 /home/zenoss/.erlang-cookie
+
+2. Add ``/usr/sbin`` to the *zenoss* user's path.
+
+   .. sourcecode:: bash
+
+      echo 'export PATH="$PATH:/usr/sbin"' >> /home/zenoss/.bashrc
 
 
 Screenshots

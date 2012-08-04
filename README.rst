@@ -184,9 +184,9 @@ run ``rabbitmqctl``.
    .. sourcecode:: bash
 
       su -
-      cp /var/lib/rabbitmq/.erlang-cookie /home/zenoss
-      chown zenoss:zenoss /home/zenoss/.erlang-cookie
-      chmod 0400 /home/zenoss/.erlang-cookie
+      cp /var/lib/rabbitmq/.erlang.cookie /home/zenoss
+      chown zenoss:zenoss /home/zenoss/.erlang.cookie
+      chmod 0400 /home/zenoss/.erlang.cookie
 
 2. Add ``/usr/sbin`` to the *zenoss* user's path.
 

@@ -23,16 +23,7 @@ from .interfaces import (
     )
 
 
-class RabbitMQComponentInfo(ComponentInfo):
-    @property
-    def entity(self):
-        return {
-            'uid': self._object.getPrimaryUrlPath(),
-            'name': self._object.titleOrId(),
-            }
-
-
-class RabbitMQNodeInfo(RabbitMQComponentInfo):
+class RabbitMQNodeInfo(ComponentInfo):
     implements(IRabbitMQNodeInfo)
 
     @property
@@ -56,7 +47,7 @@ class RabbitMQNodeInfo(RabbitMQComponentInfo):
         return count
 
 
-class RabbitMQVHostInfo(RabbitMQComponentInfo):
+class RabbitMQVHostInfo(ComponentInfo):
     implements(IRabbitMQVHostInfo)
 
     @property
@@ -73,7 +64,7 @@ class RabbitMQVHostInfo(RabbitMQComponentInfo):
         return self._object.rabbitmq_queues.countObjects()
 
 
-class RabbitMQExchangeInfo(RabbitMQComponentInfo):
+class RabbitMQExchangeInfo(ComponentInfo):
     implements(IRabbitMQExchangeInfo)
 
     exchange_type = ProxyProperty('exchange_type')
@@ -92,7 +83,7 @@ class RabbitMQExchangeInfo(RabbitMQComponentInfo):
         return self._object.rabbitmq_vhost()
 
 
-class RabbitMQQueueInfo(RabbitMQComponentInfo):
+class RabbitMQQueueInfo(ComponentInfo):
     implements(IRabbitMQQueueInfo)
 
     durable = ProxyProperty('durable')

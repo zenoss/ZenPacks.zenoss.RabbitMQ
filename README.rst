@@ -250,3 +250,13 @@ Screenshots
 .. |Exchanges| image:: https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/exchanges.png
 .. |Queues| image:: https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/queues.png
 .. |Queue Metrics| image:: https://github.com/zenoss/ZenPacks.zenoss.RabbitMQ/raw/master/docs/queues_metrics.png
+
+
+Changes
+===============================================================================
+
+1.0.5
+-------------------------------------------------------------------------------
+
+* Fixed "No data returned for command" event when no queues, connections or
+  channels exist.

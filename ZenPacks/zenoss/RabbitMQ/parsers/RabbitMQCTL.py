@@ -93,7 +93,7 @@ class RabbitMQCTL(CommandParser):
 
             # pid, channels, recv_oct, recv_cnt, send_oct, send_cnt, send_pend
             if len(fields) != 7:
-                return
+                continue
 
             connections[fields[0]] = dict(
                 channels=int(fields[1]),
@@ -175,7 +175,7 @@ class RabbitMQCTL(CommandParser):
 
             # pid consumer_count messages_unacknowledged acks_uncommitted
             if len(fields) != 4:
-                return
+                continue
 
             channels[fields[0]] = dict(
                 consumers=int(fields[1]),
@@ -214,7 +214,7 @@ class RabbitMQCTL(CommandParser):
             # name messages_ready messages_unacknowledged messages consumers
             # memory
             if len(fields) != 6:
-                return
+                continue
 
             queues[fields[0]] = dict(
                 ready=int(fields[1]),

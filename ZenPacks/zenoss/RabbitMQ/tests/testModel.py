@@ -14,9 +14,11 @@
 import logging
 log = logging.getLogger('zen.RabbitMQ')
 
+from transaction._transaction import Transaction
 from Products.Five import zcml
 
 from Products.DataCollector.ApplyDataMap import ApplyDataMap
+from Products.ZenModel import ZVersion
 from Products.ZenTestCase.BaseTestCase import BaseTestCase
 from Products.Zuul.interfaces.info import IInfo
 
@@ -25,20 +27,46 @@ from ..modeler.plugins.zenoss.ssh.RabbitMQ import RabbitMQ as RabbitMQModeler
 from .util import loadData
 
 
+class MockJar(object):
+    """Mock object for x._p_jar.
+
+    Used to trick ApplyDataMap into not aborting transactions after adding
+    non-persistent objects. Without doing this, all sub-components will cause
+    ugly tracebacks in modeling tests.
+
+    """
+
+    def sync(self):
+        pass
+
+
 class TestModel(BaseTestCase):
     def afterSetUp(self):
         super(TestModel, self).afterSetUp()
 
+        # BaseTestCast.afterSetUp already hides transaction.commit. So we also
+        # need to hide transaction.abort.
+        self._transaction_abort = Transaction.abort
+        Transaction.abort = lambda *x: None
+
         self.d = self.dmd.Devices.createInstance('zenoss.RabbitMQ.testDevice')
+
+        if not ZVersion.VERSION.startswith('3.'):
+            self.d.dmd._p_jar = MockJar()
+
         self.applyDataMap = ApplyDataMap()._applyDataMap
 
         # Required to prevent erroring out when trying to define viewlets in
         # ../browser/configure.zcml.
-        import Products.ZenUI3.navigation
-        zcml.load_config('testing.zcml', Products.ZenUI3.navigation)
+        import zope.viewlet
+        zcml.load_config('meta.zcml', zope.viewlet)
 
         import ZenPacks.zenoss.RabbitMQ
         zcml.load_config('configure.zcml', ZenPacks.zenoss.RabbitMQ)
+
+    def beforeTearDown(self):
+        if hasattr(self, '_transaction_abort'):
+            Transaction.abort = self._transaction_abort
 
     def _loadZenossData(self):
         modeler = RabbitMQModeler()

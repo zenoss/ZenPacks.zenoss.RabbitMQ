@@ -175,24 +175,36 @@ this is only true for the root user.
    the intent to do so.
 
 
-Assuming that you've created a user named *zenoss* on your RabbitMQ servers for
-monitoring purposes, you can follow these steps to allow the *zenoss* user to
-run ``rabbitmqctl``.
+Assuming that you've created a user named *zenmonitor* on your RabbitMQ servers
+for monitoring purposes, you can follow these steps to allow the *zenmonitor*
+user to run ``rabbitmqctl``.
 
-1. Copy RabbitMQ's Erlang cookie to the *zenoss* user's home directory.
+1. Install the *sudo* package on your server.
 
-   .. sourcecode:: bash
+2. Make sudo not require a TTY. This allows sudo to be run via ssh.
 
-      su -
-      cp /var/lib/rabbitmq/.erlang.cookie /home/zenoss
-      chown zenoss:zenoss /home/zenoss/.erlang.cookie
-      chmod 0400 /home/zenoss/.erlang.cookie
+   1. Run ``visudo`` as root.
 
-2. Add ``/usr/sbin`` to the *zenoss* user's path.
+   2. Find a line containing ``Defaults requiretty`` and comment it out by
+      prefixing the line with a ``#``.
 
-   .. sourcecode:: bash
+   3. Type ``ESC`` then ``:wq`` to save the sudo configuration.
 
-      echo 'export PATH="$PATH:/usr/sbin"' >> /home/zenoss/.bashrc
+3. Allow the *zenmonitor* user to run rabbitmqctl.
+
+   1. Run ``visudo`` as root.
+
+   2. Add the following line to the bottom of the file.
+
+      .. sourcecode::
+
+         zenmonitor ALL=(ALL) NOPASSWD: /usr/sbin/rabbitmqctl
+
+   3. Type ``ESC`` then ``:wq`` to save the sudo configuration.
+
+4. Alias rabbitmqctl for the *zenmonitor* user.
+
+   1. Add the following lines to ``/home/zenmonitor/.bashrc``.
 
 
 Screenshots

@@ -206,6 +206,11 @@ user to run ``rabbitmqctl``.
 
    1. Add the following lines to ``/home/zenmonitor/.bashrc``.
 
+      .. sourcecode::
+
+         shopt -s expand_aliases
+         alias rabbitmqctl="sudo /usr/sbin/rabbitmqctl"
+
 
 Screenshots
 ===============================================================================

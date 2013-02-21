@@ -20,7 +20,7 @@ Prerequisite            Restriction
 Zenoss Platform         3.2 or greater
 Zenoss Processes        zenmodeler, zencommand
 Installed ZenPacks      ZenPacks.zenoss.RabbitMQ
-Firewall Access        Collector server to 22/tcp (ssh) of RabbitMQ server
+Firewall Access         Collector server to 22/tcp (ssh) of RabbitMQ server
 ======================  ====================================================
 
 

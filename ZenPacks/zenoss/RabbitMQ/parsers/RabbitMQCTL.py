@@ -52,6 +52,8 @@ def loadData(keys, expiration=1800):
 
 
 class RabbitMQCTL(CommandParser):
+    createDefaultEventUsingExitCode = False
+
     eventKey = eventClassKey = 'rabbitmq_node_status'
 
     event = None
@@ -65,22 +67,16 @@ class RabbitMQCTL(CommandParser):
             return
 
         # Get as much error handling out of the way right away.
-        if self.isError(cmd, result):
+        if not self.verifyResult(cmd, result):
             return
 
         # Route to the right parser based on the command.
-        if 'status' in cmd.command:
-            self.processStatusResults(cmd, result)
-        elif 'list_connections' in cmd.command:
+        if 'list_connections' in cmd.command:
             self.processListConnectionsResults(cmd, result)
         elif 'list_channels' in cmd.command:
             self.processListChannelsResults(cmd, result)
         elif 'list_queues' in cmd.command:
             self.processListQueuesResults(cmd, result)
-
-    def processStatusResults(self, cmd, result):
-        result.events.append(self.getEvent(
-            cmd, "node status is OK", clear=True))
 
     def processListConnectionsResults(self, cmd, result):
         connections = {}
@@ -236,31 +232,35 @@ class RabbitMQCTL(CommandParser):
                 result.values.append((
                     point, queues[point.component][point.id]))
 
-    def isError(self, cmd, result):
-        match = re.search(r'^Error: (.+)$', cmd.result.output, re.MULTILINE)
-        if match:
-            result.events.append(self.getEvent(
-                cmd, match.group(1),
-                message=cmd.result.output))
+    def verifyResult(self, cmd, result):
+        clear = True
+        summary = 'status is OK'
 
-            return True
+        if clear:
+            match = re.search(
+                r'^Error: (.+)$', cmd.result.output, re.MULTILINE)
 
-        match = re.search(r'command not found', cmd.result.output, re.MULTILINE)
-        if match:
-            result.events.append(self.getEvent(
-                cmd, "command not found: rabbitmqctl",
-                message=cmd.result.output))
+            if match:
+                summary = match.group(1)
+                clear = False
 
-            return True
+        if clear:
+            match = re.search(
+                r'command not found', cmd.result.output, re.MULTILINE)
 
-        if cmd.result.exitCode != 0:
-            result.events.append(self.getEvent(
-                cmd, "rabbitmqctl error - see event message",
-                message=cmd.result.output))
+            if match:
+                summary = 'command not found: rabbitmqctl'
+                clear = False
 
-            return True
+        if clear:
+            if cmd.result.exitCode != 0:
+                summary = 'rabbitmqctl error - see event message'
+                clear = False
 
-        return False
+        if 'status' in cmd.command:
+            result.events.append(self.getEvent(cmd, summary, clear=clear))
+
+        return clear
 
     def getEvent(self, cmd, summary, message=None, clear=False):
         event = dict(

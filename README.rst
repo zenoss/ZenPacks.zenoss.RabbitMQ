@@ -260,8 +260,14 @@ Screenshots
 Changes
 ===============================================================================
 
+
+1.0.6
+-------------------------------------------------------------------------------
+
+* (ZEN-5533) /Status/RabbitMQ for queues don't auto-clear when resolved
+
+
 1.0.5
 -------------------------------------------------------------------------------
 
-* Fixed "No data returned for command" event when no queues, connections or
-  channels exist.
+* (ZEN-3526) RabbitMQ: No data returned for command

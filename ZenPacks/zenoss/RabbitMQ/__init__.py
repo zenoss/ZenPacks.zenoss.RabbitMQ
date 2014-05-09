@@ -28,10 +28,16 @@ from Products.ZenRelations.RelSchema import ToManyCont, ToOne
 from Products.ZenUtils.Utils import unused
 from Products.Zuul.interfaces import ICatalogTool
 
+from Products.ZenRelations.zPropertyCategory import setzPropertyCategory
+
 unused(Globals)
 
 
 ZENPACK_NAME = 'ZenPacks.zenoss.RabbitMQ'
+
+# Set zProperty categories for RabbitMQAdmin zProperties
+setzPropertyCategory('zRabbitMQAdminUser', 'RabbitMQ')
+setzPropertyCategory('zRabbitMQAdminPassword', 'RabbitMQ')
 
 # Define new device relations.
 NEW_DEVICE_RELATIONS = (
@@ -55,6 +61,10 @@ class ZenPack(ZenPackBase):
     """
     ZenPack loader that handles custom installation and removal tasks.
     """
+    packZProperties =  [
+        ('zRabbitMQAdminUser', 'zenoss', 'string'),
+        ('zRabbitMQAdminPassword', 'zenoss', 'password'),
+    ]
 
     def install(self, app):
         self.pre_install(app)

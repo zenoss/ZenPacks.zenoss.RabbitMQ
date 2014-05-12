@@ -83,8 +83,8 @@ class RabbitMQAdmin(CommandParser):
 
         rabbitmqversion_result = cmd.result.output.split('\n')[0]
 
-        summary = ''
-        message = ''
+        summary = 'unspecified rabbitmqadmin error'
+        message = 'rabbitmqadmin command returned unexpected data: %s' % (cmd.result.output)
 
         match = re.search(r'No such file or directory', rabbitmqversion_result)
         if match:
@@ -92,7 +92,7 @@ class RabbitMQAdmin(CommandParser):
             message = 'Please refer to http://wiki.zenoss.org/ZenPack:RabbitMQ for setup instructions.'
             clear = False
         else:
-             match = re.search(r'rabbitmqadmin \d.\d', rabbitmqversion_result)
+             match = re.search(r'rabbitmqadmin \d\.\d', rabbitmqversion_result)
              # In RabbitMQ version 3.1.x and later, --version was added
              if match:
                  summary = 'rabbitmqadmin status is OK'

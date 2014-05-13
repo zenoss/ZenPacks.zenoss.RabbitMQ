@@ -743,6 +743,74 @@ Monitors the status of a RabbitMQ queue by running rabbitmqctl via SSH.
 ZenPacks.zenoss.RabbitMQ.RabbitMQQueue
 </property>
 <tomanycont id='datasources'>
+<object id='RabbitMQRates' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+COMMAND
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="component" mode="w" >
+${here/id}
+</property>
+<property type="string" id="eventClass" mode="w" >
+/Perf/RabbitMQ
+</property>
+<property type="string" id="eventKey" mode="w" >
+rabbitmq_node_status
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property type="string" id="commandTemplate" mode="w" >
+/usr/local/bin/rabbitmqadmin --version 2&gt;&amp;1; /usr/local/bin/rabbitmqadmin list queues -u ${here/zRabbitMQAdminUser} -p ${here/zRabbitMQAdminPassword} -f tsv name message_stats.publish_details.rate message_stats.deliver_get_details.rate  2&gt;&amp;1
+</property>
+<property type="int" id="cycletime" mode="w" >
+5
+</property>
+<property type="boolean" id="usessh" mode="w" >
+True
+</property>
+<property type="string" id="parser" mode="w" >
+ZenPacks.zenoss.RabbitMQ.parsers.RabbitMQAdmin
+</property>
+<tomanycont id='datapoints'>
+<object id='incoming_rate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property id='zendoc' type='string'>
+The rate of messages entering the queue
+</property>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+<property type="string" id="description" mode="w" >
+The rate of messages entering the queue
+</property>
+</object>
+<object id='outgoing_rate' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property id='zendoc' type='string'>
+The rate of rabbitmq messages leaving the queue
+</property>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+0
+</property>
+<property type="string" id="description" mode="w" >
+The rate of rabbitmq messages leaving the queue
+</property>
+</object>
+</tomanycont>
+</object>
 <object id='rabbitQueues' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
 <property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
 COMMAND
@@ -751,7 +819,7 @@ COMMAND
 True
 </property>
 <property type="string" id="component" mode="w" >
-${here/title}
+${here/id}
 </property>
 <property type="string" id="eventClass" mode="w" >
 /Status/RabbitMQ
@@ -865,6 +933,12 @@ Number of messages delivered to clients but not yet acknowledged.
 </tomanycont>
 <tomanycont id='thresholds'>
 <object id='queue size' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="string" id="eventClass" mode="w" >
+/Perf/RabbitMQ
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
 <property label="DataPoints" type="lines" id="dsnames" mode="w" >
 ['rabbitQueues_messages']
 </property>
@@ -873,12 +947,6 @@ True
 </property>
 <property type="string" id="maxval" mode="w" >
 here.threshold_messages_max is None and 1e6 or here.threshold_messages_max
-</property>
-<property type="string" id="eventClass" mode="w" >
-/Perf/RabbitMQ
-</property>
-<property type="int" id="severity" mode="w" >
-3
 </property>
 <property type="int" id="escalateCount" mode="w" >
 0
@@ -999,6 +1067,95 @@ ${graphPoint/id}
 </property>
 <property type="string" id="dpName" mode="w" >
 rabbitQueues_memory
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='Message Flow Rates' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<property type="int" id="height" mode="w" >
+100
+</property>
+<property type="int" id="width" mode="w" >
+500
+</property>
+<property type="string" id="units" mode="w" >
+messages/second
+</property>
+<property type="boolean" id="log" mode="w" >
+False
+</property>
+<property type="boolean" id="base" mode="w" >
+False
+</property>
+<property type="int" id="miny" mode="w" >
+0
+</property>
+<property type="int" id="maxy" mode="w" >
+-1
+</property>
+<property type="boolean" id="hasSummary" mode="w" >
+True
+</property>
+<property type="long" id="sequence" mode="w" >
+3
+</property>
+<tomanycont id='graphPoints'>
+<object id='Incoming Message Rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+0
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+RabbitMQRates_incoming_rate
+</property>
+<property type="string" id="cFunc" mode="w" >
+AVERAGE
+</property>
+</object>
+<object id='Outgoing Message Rate' module='Products.ZenModel.DataPointGraphPoint' class='DataPointGraphPoint'>
+<property type="long" id="sequence" mode="w" >
+1
+</property>
+<property select_variable="lineTypes" type="selection" id="lineType" mode="w" >
+LINE
+</property>
+<property type="long" id="lineWidth" mode="w" >
+1
+</property>
+<property type="boolean" id="stacked" mode="w" >
+False
+</property>
+<property type="string" id="format" mode="w" >
+%5.2lf
+</property>
+<property type="string" id="legend" mode="w" >
+${graphPoint/id}
+</property>
+<property type="long" id="limit" mode="w" >
+-1
+</property>
+<property type="string" id="dpName" mode="w" >
+RabbitMQRates_outgoing_rate
 </property>
 <property type="string" id="cFunc" mode="w" >
 AVERAGE

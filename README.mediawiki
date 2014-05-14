@@ -111,41 +111,44 @@ Assuming that you've created a user named '''zenmonitor''' on your RabbitMQ serv
 === Using RabbitMQAdmin ===
 Rabbitmqadmin is a script provided by RabbitMQ included with the rabbitmq_management plugin.  Rabbitmqadmin can perform a variety of tasks and provide performance statistics for RabbitMQ.  To install '''rabbitmqadmin''', the following conditions must be met on each RabbitMQ server you want to monitor:
 
-* '''Erlang R14B''' or greater must installed
-* The '''rabbitmq_management''' plugin must be enabled
-* The '''rabbitmqadmin''' script must be saved to the local filesystem
-* A user with '''administrator''' tags must be used (will be stored in zProperties)
+# '''Erlang R14B''' or greater must installed
+# A RabbitMQ user with '''administrator''' tags must be used (will be stored in zProperties)
+# The '''rabbitmq_management''' plugin must be enabled
+# The '''rabbitmqadmin''' script must be saved to the RabbitMQ server filesystem
 
-; Erlang
-If your installed version of Erlang on each RabbitMQ server is < R14B, Erlang must first be updated.  Please follow whatever requirements are needed to update Erlang for your RabbitMQ server(s).  On RHEL/CentOS, you can check the installed version of Erlang with the command '''rpm -qa | grep -i erlang'''.
+; 1. Erlang
+If the installed version of Erlang on each RabbitMQ server is < R14B, Erlang must first be updated.  Please follow whatever requirements are needed to update Erlang for each RabbitMQ server(s).  On RHEL/CentOS, for instance, you can check the installed version of Erlang with the command '''rpm -qa | grep -i erlang'''.
 
 If you are updating Erlang on a RHEL/CentOS server (with or without Zenoss):
-* Download an updated Erlang version for your platform - we recommend version R15B03 (wget http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/esl-erlang_15.b.3-1~centos~6_amd64.rpm)
-* Download an Erlang compat RPM (wget https://github.com/jasonmcintosh/esl-erlang-compat/blob/master/rpmbuild/RPMS/noarch/esl-erlang-compat-R14B-1.el6.noarch.rpm?raw=true --no-check-certificate)
-* If zenoss is present:  service zenoss stop
-* service rabbitmq-server stop
-* Remove your previous version of Erlang - if your version of Erlang is R12B, you can use the command: rpm -e erlang-R12B --nodeps
-* yum localinstall esl-erlang_15.b.3-1~centos~6_amd64.rpm
-* yum localinstall esl-erlang-compat-R14B-1.el6.noarch.rpm
-* service rabbitmq-server start
-* If zenoss is present: service zenoss start
+ * Download an updated Erlang version for your platform - we recommend version R15B03 (wget http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/esl-erlang_15.b.3-1~centos~6_amd64.rpm)
+ * Download an Erlang compat RPM (wget https://github.com/jasonmcintosh/esl-erlang-compat/blob/master/rpmbuild/RPMS/noarch/esl-erlang-compat-R14B-1.el6.noarch.rpm?raw=true --no-check-certificate)
+ * If zenoss is present:  service zenoss stop
+ * service rabbitmq-server stop
+ * Remove your previous version of Erlang - if your version of Erlang is R12B, you can use the command: rpm -e erlang-R12B --nodeps
+ * yum localinstall esl-erlang_15.b.3-1~centos~6_amd64.rpm
+ * yum localinstall esl-erlang-compat-R14B-1.el6.noarch.rpm
+ * service rabbitmq-server start
+ * If zenoss is present: service zenoss start
 
-; Give a user administrator tags (and configure zProperties)
-If you are using a non-root user or have additional RabbitMQ users that you will use for rabbitmqadmin monitoring, you must give them adminstrator permissions.  In this example, we will be using the "zenoss" RabbitMQ user to run rabbitmqadmin commands:
-* rabbitmqctl set_user_tags zenoss administrator
-* In the Zenoss UI, for your device monitoring RabbitMQ, you must set your zRabbitMQAdminUser and zRabbitMQAdminPassword appropriately (both default to zenoss)
+; 2. Give a RabbitMQ user administrator tags (and configure needed zProperties)
+Rabbitmqadmin uses a user to authenticate with Rabbit for performing operations.  If you are using a non-root user or have additional RabbitMQ users that you will use for rabbitmqadmin monitoring, you must give them rabbitmq adminstrator permissions.  In the example below, we will be using the "zenoss" RabbitMQ user to run rabbitmqadmin commands (replace as appropriate):
 
-; Enable the RabbitMQ management plugin
-* rabbitmq-plugins enable rabbitmq_management
-* service rabbitmq-server restart
+ * rabbitmqctl set_user_tags zenoss administrator
+ * In the Zenoss UI, for your RabbitMQ device, change the Configuration Property '''zSshConcurrentSessions''' to 1
+ * In the Zenoss UI, for your RabbitMQ device, set your '''zRabbitMQAdminUser''' and '''zRabbitMQAdminPassword''' appropriately 
 
-; Download the rabbitmqadmin script
-1. Download the rabbitmqadmin script to /usr/local/bin/rabbitmqadmin:
- * RabbitMQ 2.x: http://{your-server}:55672/cli/rabbitmqadmin
- * RabbitMQ 3.x: http://{your-server}:15672/cli/rabbitmqadmin
+; 3. Enable the RabbitMQ management plugin
+ * rabbitmq-plugins enable rabbitmq_management
+ * service rabbitmq-server restart
+
+; 4. Download the rabbitmqadmin script
+1. Download the rabbitmqadmin script to /usr/local/bin/:
+ * cd /usr/local/bin
+ * RabbitMQ 2.x: wget http://{your-rabbitmq-server}:55672/cli/rabbitmqadmin -u {your-rabbitmq-user} -p {your-rabbitmq-user-password}
+ * RabbitMQ 3.x: wget http://{your-rabbitmq-server}:15672/cli/rabbitmqadmin -u {your-rabbitmq-user} -p {your-rabbitmq-user-password}
 2. Make the rabbitmqadmin file executable and update ownership:
  * chmod +x /usr/local/bin/rabbitmqadmin
- * If you are running the commands as a non-root user, chown (your user):(your group) /usr/local/bin/rabbitmqadmin
+ * If you are running the SSH commands as a non-root user, chown (your user):(your group) /usr/local/bin/rabbitmqadmin
 
 == Change Log ==
 

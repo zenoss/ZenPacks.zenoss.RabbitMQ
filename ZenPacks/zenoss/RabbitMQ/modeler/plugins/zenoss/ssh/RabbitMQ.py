@@ -136,8 +136,14 @@ class RabbitMQ(CommandPlugin):
             if not exchange_string.strip():
                 continue
 
-            name, exchange_type, durable, auto_delete, arguments = \
-                re.split(r'\s+', exchange_string)
+            try:
+                name, exchange_type, durable, auto_delete, arguments = \
+                    re.split(r'\s+', exchange_string)
+            except ValueError:
+                LOG.info('This line has an invalid number of values: %s. Trying to fix it', exchange_string)
+                parts = re.split(r'\s+', exchange_string)
+                name = ' '.join(parts[0:(len(parts)-4)])
+		exchange_type, durable, auto_delete, arguments = parts[-4:]
 
             if not name:
                 name = 'amq.default'

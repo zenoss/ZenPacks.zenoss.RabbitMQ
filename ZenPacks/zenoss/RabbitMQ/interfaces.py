@@ -65,3 +65,16 @@ class IRabbitMQQueueInfo(IComponentInfo):
     threshold_messages_max = schema.Int(
         title=_t(u"Threshold - Messages (Maximum)"),
         alwaysEditable=True)
+
+class IRabbitMQQueueAPIInfo(IComponentInfo):
+    rabbitmq_node = schema.Entity(title=_t(u"Node"))
+    rabbitmq_vhost = schema.Entity(title=_t(u"VHost"))
+    durable = schema.Bool(title=_t("Durable"))
+    auto_delete = schema.Bool(title=_t("Auto-Delete"))
+    arguments = SingleLineText(title=_t(u"Arguments"))
+    state = SingleLineText(title=_t(u"State"))
+    api = schema.Bool(title=_t("API"))
+
+    threshold_messages_max = schema.Int(
+        title=_t(u"Threshold - Messages (Maximum)"),
+        alwaysEditable=True)

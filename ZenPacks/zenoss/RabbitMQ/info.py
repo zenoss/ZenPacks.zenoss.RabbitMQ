@@ -19,7 +19,7 @@ from Products.Zuul.infos.component import ComponentInfo
 
 from .interfaces import (
     IRabbitMQNodeInfo, IRabbitMQVHostInfo, IRabbitMQExchangeInfo,
-    IRabbitMQQueueInfo,
+    IRabbitMQQueueInfo,IRabbitMQQueueAPIInfo
     )
 
 
@@ -89,7 +89,8 @@ class RabbitMQQueueInfo(ComponentInfo):
     durable = ProxyProperty('durable')
     auto_delete = ProxyProperty('auto_delete')
     arguments = ProxyProperty('arguments')
-
+    state = ProxyProperty('state')
+    api = ProxyProperty('api')
     @property
     def threshold_messages_max(self):
         return self._object.threshold_messages_max
@@ -110,3 +111,38 @@ class RabbitMQQueueInfo(ComponentInfo):
     @info
     def rabbitmq_vhost(self):
         return self._object.rabbitmq_vhost()
+
+class RabbitMQQueueAPIInfo(ComponentInfo):
+    implements(IRabbitMQQueueAPIInfo)
+    
+    durable = ProxyProperty('durable')
+    auto_delete = ProxyProperty('auto_delete')
+    arguments = ProxyProperty('arguments')
+    state = ProxyProperty('state')
+    api = ProxyProperty('api')
+    @property
+    def threshold_messages_max(self):
+        return self._object.threshold_messages_max
+
+    @threshold_messages_max.setter
+    def threshold_messages_max(self, value):
+        if value is None or value is '':
+            self._object.threshold_messages_max = None
+        else:
+            self._object.threshold_messages_max = int(value)
+
+    @property
+    @info
+    def rabbitmq_node(self):
+        return self._object.rabbitmq_vhost().rabbitmq_node()
+
+    @property
+    @info
+    def rabbitmq_vhost(self):
+        return self._object.rabbitmq_vhost()
+    @property
+    def status(self):
+	if self.state != 'running' and self.api:
+		return 'Down'
+	else:
+		return 'Up'

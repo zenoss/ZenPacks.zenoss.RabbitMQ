@@ -15,9 +15,9 @@ from Products.ZenRelations.RelSchema import ToManyCont, ToOne
 
 from .RabbitMQComponent import RabbitMQComponent
 
-
-class RabbitMQQueue(RabbitMQComponent):
-    meta_type = portal_type = "RabbitMQQueue"
+class RabbitMQAPIQueue(RabbitMQComponent):
+    meta_type =  'RabbitMQAPIQueue'
+    portal_type = "RabbitMQQueue"
 
     # Modeled attributes.
     durable = None
@@ -54,3 +54,4 @@ class RabbitMQQueue(RabbitMQComponent):
     @property
     def rabbitmq_vhost_name(self):
         return self.rabbitmq_vhost().title
+

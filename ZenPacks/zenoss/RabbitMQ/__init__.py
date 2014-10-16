@@ -38,14 +38,17 @@ ZENPACK_NAME = 'ZenPacks.zenoss.RabbitMQ'
 # Set zProperty categories for RabbitMQAdmin zProperties
 setzPropertyCategory('zRabbitMQAdminUser', 'RabbitMQ')
 setzPropertyCategory('zRabbitMQAdminPassword', 'RabbitMQ')
+setzPropertyCategory('zRabbitMQAPIPort', 'RabbitMQ')
 
 # Define new device relations.
 NEW_DEVICE_RELATIONS = (
     ('rabbitmq_nodes', 'RabbitMQNode'),
+    ('rabbitmq_apinodes', 'RabbitMQNodeAPI'),
     )
 
 NEW_COMPONENT_TYPES = (
     'ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQNode',
+    'ZenPacks.zenoss.RabbitMQ.RabbitMQNode.RabbitMQNodeAPI',
     )
 
 # Add new relationships to Device if they don't already exist.
@@ -64,6 +67,7 @@ class ZenPack(ZenPackBase):
     packZProperties =  [
         ('zRabbitMQAdminUser', 'zenoss', 'string'),
         ('zRabbitMQAdminPassword', 'zenoss', 'password'),
+        ('zRabbitMQAPIPort', '15672', 'int'),
     ]
 
     def install(self, app):

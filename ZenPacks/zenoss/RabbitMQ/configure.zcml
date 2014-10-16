@@ -7,6 +7,11 @@
         for=".RabbitMQNode.RabbitMQNode"
         factory=".info.RabbitMQNodeInfo"
         />
+    <adapter
+        provides=".interfaces.IRabbitMQNodeInfo"
+        for=".RabbitMQNodeAPI.RabbitMQNodeAPI"
+        factory=".info.RabbitMQNodeInfo"
+        />
 
     <adapter
         provides=".interfaces.IRabbitMQVHostInfo"
@@ -26,6 +31,11 @@
         factory=".info.RabbitMQQueueInfo"
         />
 
+    <adapter
+        provides=".interfaces.IRabbitMQQueueAPIInfo"
+        for=".RabbitMQAPIQueue.RabbitMQAPIQueue"
+        factory=".info.RabbitMQQueueAPIInfo"
+        />
 
     <!-- Include Browser Code -->
     <include package=".browser"/>       

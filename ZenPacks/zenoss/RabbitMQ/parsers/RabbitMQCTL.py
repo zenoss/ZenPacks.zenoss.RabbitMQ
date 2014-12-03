@@ -19,6 +19,7 @@ import tempfile
 import time
 
 from Products.ZenRRD.CommandParser import CommandParser
+from Products.ZenUtils.Utils import prepId
 
 
 def getTempFilename(keys):
@@ -91,7 +92,7 @@ class RabbitMQCTL(CommandParser):
             if len(fields) != 7:
                 continue
 
-            connections[fields[0]] = dict(
+            connections[prepId(fields[0])] = dict(
                 channels=int(fields[1]),
                 recvBytes=int(fields[2]),
                 recvCount=int(fields[3]),
@@ -173,7 +174,7 @@ class RabbitMQCTL(CommandParser):
             if len(fields) != 4:
                 continue
 
-            channels[fields[0]] = dict(
+            channels[prepId(fields[0])] = dict(
                 consumers=int(fields[1]),
                 unacknowledged=int(fields[2]),
                 uncommitted=int(fields[3]),
@@ -212,7 +213,7 @@ class RabbitMQCTL(CommandParser):
             if len(fields) != 6:
                 continue
 
-            queues[fields[0]] = dict(
+            queues[prepIdfields[0])] = dict(
                 ready=int(fields[1]),
                 unacknowledged=int(fields[2]),
                 messages=int(fields[3]),

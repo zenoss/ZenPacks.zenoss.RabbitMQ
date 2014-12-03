@@ -20,6 +20,7 @@ import time
 import logging
 
 from Products.ZenRRD.CommandParser import CommandParser
+from Products.ZenUtils.Utils import prepId
 
 log = logging.getLogger('zen.RabbitMQ')
 
@@ -58,9 +59,9 @@ class RabbitMQAdmin(CommandParser):
             if fields == ['name', 'message_stats.publish_details.rate', 'message_stats.deliver_get_details.rate']:
                 continue
             elif len(fields) == 1:
-                queues[fields[0]] = dict(incoming_rate=0.0, outgoing_rate=0.0) 
+                queues[prepId(fields[0])] = dict(incoming_rate=0.0, outgoing_rate=0.0) 
             elif len(fields) == 3:
-                queues[fields[0]] = dict(
+                queues[prepId(fields[0])] = dict(
                     incoming_rate=float(fields[1]),
                     outgoing_rate=float(fields[2])
                     )

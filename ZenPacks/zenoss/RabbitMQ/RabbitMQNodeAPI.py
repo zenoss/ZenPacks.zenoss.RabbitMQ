@@ -17,7 +17,7 @@ from .RabbitMQComponent import RabbitMQComponent
 
 
 class RabbitMQNodeAPI(RabbitMQComponent):
-    meta_type = "RabbiteMQNodeAPI"
+    meta_type = "RabbitMQNodeAPI"
     portal_type = "RabbitMQNode"
 
     _relations = RabbitMQComponent._relations + (

@@ -1,57 +1,37 @@
+import time
 from Products.ZenEvents import ZenEventClasses
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
 	import PythonDataSourcePlugin
 from twisted.internet import defer
 from twisted.internet.defer import DeferredList
+from twisted.web.client import getPage
+from twisted.web.error import Error
+from base64 import b64encode
+import json
 import logging
 
-import ZenPacks.community.NetScaler.locallibs
+LOG = logging.getLogger('zen.RabbitMQ')
 
-# Requires that locallibs first be imported.
-import libNetscaler
-log = logging.getLogger('zen.NetScalerDS')
+from Products.DataCollector.plugins.DataMaps import ObjectMap, RelationshipMap
+from Products.ZenUtils.Utils import prepId
 
-class NetScalerPlugin(PythonDataSourcePlugin):
-	log.debug("Starting NetScaler plugin")
-	"""Explanation of what MyPlugin does."""
-	client = None	
-	session = None
-	lbvserver_vars=['actsvcs',
-		'curclntconnections',
-		'cursrvrconnections',
-		'deferredreq',
-		'deferredreqrate',
-		'establishedconn',
-		'hitsrate',
-		'inactsvcs',
-		'invalidrequestresponse',
-		'invalidrequestresponsedropped',
-		'pktsrecvdrate',
-		'pktssentrate',
-		'requestbytesrate',
-		'requestsrate',
-		'responsebytesrate',
-		'responsesrate',
-		'totalpktsrecvd',
-		'totalpktssent',
-		'totalrequestbytes',
-		'totalrequests',
-		'totalresponsebytes',
-		'totalresponses',
-		'tothits',
-		'totspillovers',
-		'vslbhealth']
-		
-	# List of device attributes you'll need to do collection.
-	proxy_attributes = (
-		'zNetScalerUser',
-		'zNetScalerPassword',
-		'zNetScalerSSL',
-		'zNetScalerTimeout'
+
+class RabbitMQDS(PythonDataSourcePlugin):
+    proxy_attributes = (
+		'zRabbitMQAdminPassword',
+		'zRabbitMQAdminUser',
+		'zRabbitMQAPIPort',
 		)
- 
-	@classmethod
-	def config_key(cls, datasource, context):
+    def __init__(self):
+	self.data = {}
+	self.events = []
+	self.values ={}
+	self.maps=[]
+	self.error=False
+	self.sev=0
+
+    @classmethod
+    def config_key(cls, datasource, context):
 		"""
 		Return a tuple defining collection uniqueness.
  
@@ -73,8 +53,8 @@ class NetScalerPlugin(PythonDataSourcePlugin):
 			datasource.plugin_classname,
 			)
  
-	@classmethod
-	def params(cls, datasource, context):
+    @classmethod
+    def params(cls, datasource, context):
 		"""
 		Return params dictionary needed for this plugin.
  
@@ -90,94 +70,225 @@ class NetScalerPlugin(PythonDataSourcePlugin):
 		information at the device level it is easier to just use
 		proxy_attributes as mentioned above.
 		"""
-		return {}
+		comps={}
+		for comp in context.getDeviceComponents():
+			if comps.has_key(comp.meta_type):
+				comps[comp.meta_type][comp.name()] =  0
+			else:
+				comps[comp.meta_type] = {}
+			
+		return comps
 
-	def makeEvent(self,message,severity):
+    def makeEvent(self,summary,severity,key,component,eclass="/Unknown",message=""):
+		if message == "":
+			message=summary	
 		return {
-			'events': [{
-				'summary': message,
-				'eventKey': 'NetScalerPlugin message',
+				'summary': summary,
+				'eventKey': key ,
 				'severity': severity,
-				}],
-			}
-	def combine(self,results):
-		all_data = {}
-		for success, result in results:
-			if not success:
-				log.error("API Error: %s", result.getErrorMessage())
-			elif result:
-				if all_data.has_key('values'):
-					all_data['values'].update(result['values'])
-				else:
-					all_data.update(result)
-		return all_data
-	def errBack(self,result):
-		log.error("error")
+				'component': component,
+				'eventClass': eclass,
+				'message': message,
+		}
 
-	def collect(self,config):
-		"""
-		No default collect behavior. You must implement this method.
- 
-		This method must return a Twisted deferred. The deferred results will
-		be sent to the onResult then either onSuccess or onError callbacks
-		below.
-		"""
-		ds0 = config.datasources[0]
-		self.ip = ds0.manageIp
-		deferreds=[]
-		if not ds0.zNetScalerUser:
-			log.error('zNetScalerUser is not set. Not discovering')
-			deferreds.append(defer.maybeDeferred(self.makeEvent,'zNetScalerUser is not set. Not discovering',2))
+    def combine(self,results,point):
+        self.data[point] = json.loads(results)
+	
+    def errBack(self,results,dev,page):
+		self.error=True
+		LOG.error("error")
+		return None
+    def collect(self,config):
+	"""
+	No default collect behavior. You must implement this method.
 
-		if not ds0.zNetScalerPassword:
-			log.error('zNetScalerPassword is not set. Not discovering.')
-			deferreds.append(defer.maybeDeferred(self.makeEvent,'zNetScalerPassword is not set. Not discovering',2))
-		if self.client is None:
-			self.client=libNetscaler.NetScalerClient(self.ip,ds0.zNetScalerUser,ds0.zNetScalerPassword,int(ds0.cycletime/4),ssl=ds0.zNetScalerSSL)
-		
-		if not self.client.login():
-			log.error('Could not login :: ' +self.client.errMessage)
-			deferreds.append(defer.maybeDeferred(self.makeEvent,'Could not login :: ' +self.client.errMessage,4))		
-		else:
-			log.info("Connected to %s with session %s" % (ds0.manageIp,self.client.session))
-			self.session = self.client.session
-			for ds in config.datasources:
-				self.client.set_timeout(int(ds.cycletime/4))
-				if ds.component is None:
-					deferreds.append(self.client.get_component_stat('system',''))
-				else:
-					deferreds.append(self.client.get_component_stat('lbvserver',ds.component))
-		d=DeferredList(deferreds,consumeErrors=True).addCallback(self.combine)
-		return(d)
+	This method must return a Twisted deferred. The deferred results will
+	be sent to the onResult then either onSuccess or onError callbacks
+	below.
+	"""
+	device = config.datasources[0]
+	deferreds=[]
+	self.page='http://%s:%s/api/' %(device.device,str(device.zRabbitMQAPIPort))
+	if not device.zRabbitMQAdminPassword or not device.zRabbitMQAdminUser:
+		LOG.info('Rabbit MQ Auth not set')
+		auth = None
+	else:
+		auth = "Basic " +b64encode(device.zRabbitMQAdminUser+":"+device.zRabbitMQAdminPassword)
+	defList=[]
+        for point in ('nodes','vhosts','queues','exchanges'):
+                if not auth:
+                        # We apparently don't need authentication for this
+                        d1 = getPage(self.page)
+                else:
+                 # We have our login information
+                        d1 = getPage(self.page+point, headers={"Authorization": auth})
 
-	def onSuccess(self, result, config):
-		"""
-		Called only on success. After onResult, before onComplete.
- 
-		You should return a data structure with zero or more events, values
-		and maps.
-		"""
-		pluginResults ={}
-		pluginResults['events'] = []
-		pluginResults['maps'] = []
-		pluginResults['values'] = None
+                d1.addCallback(self.combine,point)
+                defList.append(d1)
+                
+        dl=DeferredList(defList,consumeErrors=True)
+	dl.addCallback(self.listCall,self.page)
+	
+	return dl
+    def listCall(self,results,page):
+	#import pdb;pdb.set_trace()
+	for success,result in results:
+		if not success:
+			if result.value[0] == '401':
+				sev=ZenEventClasses.Info
+			else: 
+				self.sev=5
+				sev = ZenEventClasses.Critical
+			self.events.append(self.makeEvent("Error accessing %s" % (page),sev,"RabbitMQDown",'',"/Status/RabbitMQ",result.getErrorMessage()))
+			self.error=True
+			return None
+    def onSuccess(self, results, config):
 
-		clearEvent = {
+        maps = []
+
+        node_title = None
+        node_id = None
+        nodes = []
+	maps1 = []
+	device = config.datasources[0]
+	comps= config.datasources[0].params
+	if self.error:
+		myresult = {'events':self.events,}
+		return myresult
+        for node in self.data['nodes']: 
+		if node['running']:
+			node_title = node['name']
+			node_id = prepId(node_title)
+
+            		LOG.info('Found node %s on %s', node_title, device.device)
+
+
+        		# vhosts
+			vhosts=self.getVHostRelMap(
+            			device,'rabbitmq_apinodes/%s' % node_id,node_title,comps)
+			if vhosts:
+				nodes.append(ObjectMap(data={
+				'id': node_id,
+				'title': node_title,
+				}))
+        			maps.extend(vhosts)
+	if len(maps) > 0:
+		maps.append(RelationshipMap(
+            			relname='rabbitmq_apinodes',
+            			modname='ZenPacks.zenoss.RabbitMQ.RabbitMQNodeAPI',
+            			objmaps=nodes))
+       		self.maps =  maps
+	clearEvent = {
                 	'summary': 'successful collection',
-                	'eventKey': 'NetScalerPlugin OK',
+                	'eventKey': 'RabbitMQDown',
+			'eventClass':'/Status/RabbitMQ',
                 	'severity': ZenEventClasses.Clear,
-                }	
-		if 'events' in result:
-			pluginResults['events'] = result['events'].append(clearEvent)
+        }	
+	if not self.error:
+		self.events.append(clearEvent)
+	myresult = {'events':self.events,'maps':self.maps,}
+	return myresult
+
+    def getVHostRelMap(self, device,  compname,node,comps):
+        rel_maps = []
+        object_maps = []
+	noq = False
+	for vhost in self.data['vhosts']:	
+                vhost_title = vhost['name']
+                vhost_id = prepId(vhost_title)
+
+                object_maps.append(ObjectMap(data={
+                    'id': vhost_id,
+                    'title': vhost_title,
+                    }))
+
+        	exchanges=self.getExchangeRelMap(device,'%s/rabbitmq_vhosts/%s' % (compname, vhost_id),vhost_title,node)
+        	queues=self.getQueueRelMap(device,'%s/rabbitmq_vhosts/%s' % (compname, vhost_id),vhost_title,node)
+		
+		if len(queues.maps) == 0:
+			noq = True
 		else:
-			pluginResults['events'].append(clearEvent)
-		if 'maps' in result:	
-			pluginResults['maps'] = result['maps']
-		if 'values' in result:
-			pluginResults['values'] = result['values']
-		return pluginResults	
- 
-	def onError(self, result, config):
+			for map in queues.maps:
+				if comps.has_key('RabbitRabbitMQAPIQueue'):
+					if comps['RabbitMQAPIQueue'].has_key(map.id):
+						comps['RabbitMQAPIQueue'].pop(map.id)
+			if comps.has_key('RabbitRabbitMQAPIQueue'):
+				for queue in comps['RabbitMQAPIQueue']:
+					sev = ZenEventClasses.Critical
+					self.events.append(self.makeEvent("Missing queue %s" % (queue),sev,"RabbitMQQueueMissing",queue,"/Status/RabbitMQ",""))	
+			noq = False	
+            	   	rel_maps.append(exchanges)
+        	       	rel_maps.append(queues)
+	if noq:
+		return None
+        return [RelationshipMap(
+            compname=compname,
+            relname='rabbitmq_vhosts',
+            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQVHost',
+            objmaps=object_maps)] + rel_maps
+
+    def getExchangeRelMap(self, device, compname,vhost,node):
+        object_maps = []
+	for exchange in self.data['exchanges']:
+	    if exchange['vhost'] == vhost:
+		name = exchange['name']
+		exchange_type = exchange['type']
+		durable = exchange['durable']
+		auto_delete = exchange['auto_delete']
+		arguments = str(exchange['arguments'])
+
+            	if not name:
+                	name = 'amq.default'
+
+	        object_maps.append(ObjectMap(data={
+     			'id': prepId(name),
+        	        'title': name,
+       	        	'exchange_type': exchange_type,
+	                'durable': durable,
+        	        'auto_delete': auto_delete,
+                	'arguments': arguments,
+                	}))
+
+        return RelationshipMap(
+            compname=compname,
+            relname='rabbitmq_exchanges',
+            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQExchange',
+            objmaps=object_maps)
+
+    def getQueueRelMap(self, device, compname,vhost,node):
+        object_maps = []
+        for queue in self.data['queues']:
+		if queue['vhost'] == vhost and queue['node'] == node:
+			name = queue['name']
+			durable = queue['durable']
+			auto_delete = queue['auto_delete']
+			arguments = queue['arguments']
+			try:
+				state = queue['state']
+			except: 
+				state= 'running'
+
+            		object_maps.append(ObjectMap(data={
+                		'id': prepId(name),
+		                'title': name,
+		                'durable': durable,
+                		'auto_delete': auto_delete,
+                		'arguments': str(arguments),
+				'state':state,
+				'api':True,
+				'modelerLock':1,
+                	}))
+			if state != 'running':
+				self.events.append(self.makeEvent("Queue %s is down!" % (name),ZenEventClasses.Critical,"RabbitMQQueueDown",name,"/Status/RabbitMQ"))
+			else:
+				self.events.append(self.makeEvent("Queue %s is down!" % (name),ZenEventClasses.Clear,"RabbitMQQueueDown",name,"/Status/RabbitMQ"))
+        return RelationshipMap(
+            compname=compname,
+            relname='rabbitmq_apiqueues',
+            modname='ZenPacks.zenoss.RabbitMQ.RabbitMQAPIQueue',
+            objmaps=object_maps)
+
+    def onError(self, result, config):
 		"""
 		Called only on error. After onResult, before onComplete.
  
@@ -185,27 +296,15 @@ class NetScalerPlugin(PythonDataSourcePlugin):
 		method to be used without further processing. It recommended to
 		implement this method to capture errors.
 		"""
-		if self.client.session is not None:
-			log.info("onError: logging out " + config.id)
-			self.client.logout()
 		return {
 			'events': [{
 				'summary': 'error: %s' % result,
-				'eventKey': 'NetScalerPlugin Error',
+				'eventKey': 'RabbitMQ Error',
 				'severity': 4,
 				}],
 			}
-	def onComplete(self,result,config):
-		if self.client.session is not None:
-			log.info("onComplete: logging out " + config.id)
-			self.client.logout()
-		return result
-	def cleanup(self, config):
+    def cleanup(self, config):
 		"""
 		Called when collector exits, or task is deleted or changed.
 		"""
-		if self.client is not None and self.client.session is not None:
-			log.info("cleanup :: Logging out of NS " + config.id)
-			self.client.logout()
 		return
-

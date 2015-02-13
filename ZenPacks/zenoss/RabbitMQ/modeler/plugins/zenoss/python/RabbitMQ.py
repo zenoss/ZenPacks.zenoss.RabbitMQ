@@ -148,7 +148,10 @@ class RabbitMQ(PythonPlugin):
 			durable = queue['durable']
 			auto_delete = queue['auto_delete']
 			arguments = queue['arguments']
-			state = queue['state']
+			try:
+				state = queue['state']
+			except:
+				state = 'running'
 
             		object_maps.append(ObjectMap(data={
                 		'id': prepId(name),
@@ -158,6 +161,7 @@ class RabbitMQ(PythonPlugin):
                 		'arguments': str(arguments),
 				'state':state,
 				'api':True,
+				'modelerLock':1
                 	}))
 
         return RelationshipMap(

@@ -56,6 +56,8 @@ class RabbitMQ(PythonPlugin):
         node_id = None
         nodes = []
 	maps1 = []
+	if not self.data.has_key('nodes'):
+		return None
         for node in self.data['nodes']: 
 		if node['running']:
 			node_title = node['name']

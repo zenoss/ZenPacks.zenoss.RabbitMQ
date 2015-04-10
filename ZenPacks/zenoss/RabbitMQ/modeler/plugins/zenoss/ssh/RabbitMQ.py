@@ -86,7 +86,6 @@ class RabbitMQ(CommandPlugin):
         # vhosts
         maps.extend(self.getVHostRelMap(
             device, command_strings[1], 'rabbitmq_nodes/%s' % node_id))
-
         return maps
 
     def getVHostRelMap(self, device, vhosts_string, compname):

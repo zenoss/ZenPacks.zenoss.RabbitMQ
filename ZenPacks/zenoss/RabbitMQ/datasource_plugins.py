@@ -44,12 +44,18 @@ class RabbitMQDS(PythonDataSourcePlugin):
  
 		You can omit this method from your implementation entirely if this
 		default uniqueness behavior fits your needs. In many cases it will.
-		"""
 		return (
 			context.device().id,
 			datasource.getCycleTime(context),
 			datasource.rrdTemplate().id,
 			datasource.id,
+			datasource.plugin_classname,
+			)
+		"""
+		#import pdb;pdb.set_trace()
+		return (
+			context.device().id,
+			datasource.getCycleTime(context),
 			datasource.plugin_classname,
 			)
  
@@ -115,7 +121,7 @@ class RabbitMQDS(PythonDataSourcePlugin):
 	else:
 		auth = "Basic " +b64encode(device.zRabbitMQAdminUser+":"+device.zRabbitMQAdminPassword)
 	defList=[]
-        for point in ('nodes','vhosts','queues','exchanges'):
+        for point in ('nodes','vhosts','queues','exchanges','channels','connections'):
                 if not auth:
                         # We apparently don't need authentication for this
                         d1 = getPage(self.page)
@@ -150,20 +156,33 @@ class RabbitMQDS(PythonDataSourcePlugin):
         node_id = None
         nodes = []
 	maps1 = []
+	values={}
 	device = config.datasources[0]
 	comps= config.datasources[0].params
 	if self.error:
 		myresult = {'events':self.events,}
 		return myresult
-        for node in self.data['nodes']: 
+        collectionTime = int(time.time())
+ 	for node in self.data['nodes']: 
 		if node['running']:
 			node_title = node['name']
 			node_id = prepId(node_title)
 
             		LOG.info('Found node %s on %s', node_title, device.device)
-
-
+			channels={}
+			
+			if self.data.has_key('channels'):
+				nodeData=self.getChannelData(node['name'],self.data['channels'])
+			if self.data.has_key('connections'):
+				nodeData.update(self.getConnectionData(node['name'],self.data['connections']))
+			if len(nodeData) > 0:	
+				values[node_id] = {}
+				for value in nodeData:
+					dpName=config.datasources[0].datasource+'_'+value
+					values[node_id][dpName] = (nodeData[value],collectionTime)
         		# vhosts
+			#if LOG.getEffectiveLevel() >= 10:
+			#	import pdb;pdb.set_trace()
 			vhosts=self.getVHostRelMap(
             			device,'rabbitmq_apinodes/%s' % node_id,node_title,comps)
 			if vhosts:
@@ -186,8 +205,47 @@ class RabbitMQDS(PythonDataSourcePlugin):
         }	
 	if not self.error:
 		self.events.append(clearEvent)
-	myresult = {'events':self.events,'maps':self.maps,}
+	myresult = {'events':self.events,'maps':self.maps,'values':values}
+	
 	return myresult
+
+    def getConnectionData(self,node,connections):
+	connectionData = {}
+	connectionData['recvBytes'] = 0	
+	connectionData['recvCount'] = 0	
+	connectionData['sendBytes'] = 0
+	connectionData['sendCount'] = 0
+	connectionData['sendQueue'] = 0
+	connectionData['connections'] = 0
+	if len(connections) < 1:
+		return connectionData
+
+	for connection in connections:
+		if connection.get('node') == node:
+			connectionData['recvBytes'] = connectionData['recvBytes']  + connection.get('recv_oct',0)
+			connectionData['recvCount'] = connectionData['recvCount'] + connection.get('recv_cnt',0)
+			connectionData['sendBytes'] = connectionData['sendBytes']  + connection.get('send_oct',0)
+			connectionData['sendCount'] = connectionData['sendCount'] + connection.get('send_cnt',0)
+			connectionData['sendQueue'] = connectionData['sendQueue'] + connection.get('send_pend',0)
+			connectionData['connections'] = connectionData['connections'] + 1
+	return connectionData
+
+    def getChannelData(self,node,channels):
+	channelData = {}
+	channelData['consumers'] = 0	
+	channelData['unacknowledged'] = 0	
+	channelData['uncommitted'] = 0
+	channelData['channels'] = 0
+	if len(channels) < 1:
+		return channelData
+
+	for channel in channels:
+		if channel.get('node') == node:
+			channelData['consumers'] = channelData['consumers']  + channel.get('consumer_count',0)
+			channelData['unacknowledged'] = channelData['unacknowledged'] + channel.get('messages_unacknowledged',0)
+			channelData['uncommitted'] = channelData['uncommitted'] + channel.get('messages_uncommitted',0)
+			channelData['channels'] = channelData['channels'] + 1
+	return channelData
 
     def getVHostRelMap(self, device,  compname,node,comps):
         rel_maps = []

@@ -17,6 +17,7 @@ import os
 import re
 import tempfile
 import time
+import string
 
 from Products.ZenRRD.CommandParser import CommandParser
 
@@ -212,7 +213,8 @@ class RabbitMQCTL(CommandParser):
             if len(fields) != 6:
                 continue
 
-            queues[fields[0]] = dict(
+            translation_table = string.maketrans(':', '_')
+            queues[fields[0].translate(translation_table)] = dict(
                 ready=int(fields[1]),
                 unacknowledged=int(fields[2]),
                 messages=int(fields[3]),

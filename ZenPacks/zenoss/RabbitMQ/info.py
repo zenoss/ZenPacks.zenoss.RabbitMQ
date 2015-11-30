@@ -70,6 +70,7 @@ class RabbitMQExchangeInfo(ComponentInfo):
     exchange_type = ProxyProperty('exchange_type')
     durable = ProxyProperty('durable')
     auto_delete = ProxyProperty('auto_delete')
+    federated = ProxyProperty('federated')
     arguments = ProxyProperty('arguments')
 
     @property
@@ -88,6 +89,7 @@ class RabbitMQQueueInfo(ComponentInfo):
 
     durable = ProxyProperty('durable')
     auto_delete = ProxyProperty('auto_delete')
+    federated = ProxyProperty('federated')
     arguments = ProxyProperty('arguments')
 
     @property

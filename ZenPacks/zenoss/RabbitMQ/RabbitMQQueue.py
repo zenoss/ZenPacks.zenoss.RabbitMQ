@@ -23,6 +23,7 @@ class RabbitMQQueue(RabbitMQComponent):
     durable = None
     auto_delete = None
     arguments = None
+    federated = None
 
     # Managed attributes.
     threshold_messages_max = None
@@ -31,6 +32,7 @@ class RabbitMQQueue(RabbitMQComponent):
         {'id': 'durable', 'type': 'boolean', 'mode': 'w'},
         {'id': 'auto_delete', 'type': 'boolean', 'mode': 'w'},
         {'id': 'arguments', 'type': 'string', 'mode': 'w'},
+        {'id': 'federated', 'type': 'boolean', 'mode': 'w'},
         {'id': 'threshold_messages_max', 'type': 'int', 'mode': 'w'},
         )
 

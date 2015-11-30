@@ -23,11 +23,13 @@ class RabbitMQExchange(RabbitMQComponent):
     durable = None
     auto_delete = None
     arguments = None
+    federated = None
 
     _properties = RabbitMQComponent._properties + (
         {'id': 'exchange_type', 'type': 'string', 'mode': 'w'},
         {'id': 'durable', 'type': 'boolean', 'mode': 'w'},
         {'id': 'auto_delete', 'type': 'boolean', 'mode': 'w'},
+        {'id': 'federated', 'type': 'boolean', 'mode': 'w'},
         {'id': 'arguments', 'type': 'string', 'mode': 'w'},
         )
 

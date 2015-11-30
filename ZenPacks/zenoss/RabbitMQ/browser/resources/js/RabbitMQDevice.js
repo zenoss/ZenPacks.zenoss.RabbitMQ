@@ -260,6 +260,7 @@ ZC.RabbitMQExchangePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 {name: 'exchange_type'},
                 {name: 'durable'},
                 {name: 'auto_delete'},
+                {name: 'federated'},
                 {name: 'monitor'},
                 {name: 'monitored'},
                 {name: 'locking'}
@@ -310,6 +311,13 @@ ZC.RabbitMQExchangePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 sortable: true,
                 width: 70
             },{
+                id: 'federated',
+                dataIndex: 'federated',
+                header: _t('Federated'),
+                renderer: Zenoss.render.checkbox,
+                sortable: true,
+                width: 70
+            },{
                 id: 'monitored',
                 dataIndex: 'monitored',
                 header: _t('Monitored'),
@@ -344,6 +352,7 @@ ZC.RabbitMQQueuePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 {name: 'rabbitmq_vhost'},
                 {name: 'durable'},
                 {name: 'auto_delete'},
+                {name: 'federated'},
                 {name: 'threshold_messages_max'},
                 {name: 'monitor'},
                 {name: 'monitored'},
@@ -385,6 +394,13 @@ ZC.RabbitMQQueuePanel = Ext.extend(ZC.RabbitMQComponentGridPanel, {
                 id: 'auto_delete',
                 dataIndex: 'auto_delete',
                 header: _t('Auto-Delete'),
+                renderer: Zenoss.render.checkbox,
+                sortable: true,
+                width: 70
+            },{
+                id: 'federated',
+                dataIndex: 'federated',
+                header: _t('Federated'),
                 renderer: Zenoss.render.checkbox,
                 sortable: true,
                 width: 70

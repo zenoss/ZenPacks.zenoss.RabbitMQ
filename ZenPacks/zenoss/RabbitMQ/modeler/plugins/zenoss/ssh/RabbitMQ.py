@@ -151,6 +151,9 @@ class RabbitMQ(CommandPlugin):
                                       split_exchange[8])
                     name, exchange_type, durable, auto_delete, arguments = \
                         re.split(r'\s+', exchange_string.strip())
+                else:
+                    LOG.error("Unhandled Federated Exchange String")
+                    continue
             elif exchange_string.startswith(('direct','topic','headers','fanout')):
                 exchange_string = "amq.default " + exchange_string
                 name, exchange_type, durable, auto_delete, arguments = \
@@ -195,12 +198,16 @@ class RabbitMQ(CommandPlugin):
             if queue_string.startswith('federation'):
                 federated = True
                 split_queue = re.split(r'\s+', queue_string.strip())
-                queue_string = (split_queue[1] + " " +
-                                split_queue[4] + " " +
-                                split_queue[5] + " " +
-                                split_queue[6])
-                name, durable, auto_delete, arguments = \
-                    re.split(r'\s+', queue_string.strip())
+                if len(split_queue) == 7:
+                    queue_string = (split_queue[1] + " " +
+                                    split_queue[4] + " " +
+                                    split_queue[5] + " " +
+                                    split_queue[6])
+                    name, durable, auto_delete, arguments = \
+                        re.split(r'\s+', queue_string.strip())
+                else:
+                    LOG.error("Unhandled Federated Queue String")
+                    continue
             elif queue_string.startswith(('direct','topic','headers','fanout')):
                 queue_string = "amq.default " + queue_string
                 name, durable, auto_delete, arguments = \

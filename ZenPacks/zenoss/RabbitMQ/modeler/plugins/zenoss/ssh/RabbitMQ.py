@@ -86,7 +86,6 @@ class RabbitMQ(CommandPlugin):
         # vhosts
         maps.extend(self.getVHostRelMap(
             device, command_strings[1], 'rabbitmq_nodes/%s' % node_id))
-
         return maps
 
     def getVHostRelMap(self, device, vhosts_string, compname):
@@ -104,6 +103,9 @@ class RabbitMQ(CommandPlugin):
             if match:
                 vhost_title = match.group(1)
                 vhost_id = prepId(vhost_title)
+
+                if vhost_id == '':
+                    vhost_id = prepId("default")
 
                 object_maps.append(ObjectMap(data={
                     'id': vhost_id,
@@ -136,18 +138,33 @@ class RabbitMQ(CommandPlugin):
             if not exchange_string.strip():
                 continue
 
-            name, exchange_type, durable, auto_delete, arguments = \
-                re.split(r'\s+', exchange_string)
+            federated = False
+            exchange_string = exchange_string.strip()
+            if exchange_string.startswith('federation'):
+                federated = True
+                split_exchange = re.split(r'\s+', exchange_string.strip())
+                if len(split_exchange) == 9:
+                    exchange_string = (split_exchange[1] + " " +
+                                      split_exchange[5] + " " +
+                                      split_exchange[6].lower() + " " +
+                                      split_exchange[7].lower() + " " +
+                                      split_exchange[8])
+                    name, exchange_type, durable, auto_delete, arguments = \
+                        re.split(r'\s+', exchange_string.strip())
+            elif exchange_string.startswith(('direct','topic','headers','fanout')):
+                exchange_string = "amq.default " + exchange_string
+                name, exchange_type, durable, auto_delete, arguments = \
+                    re.split(r'\s+', exchange_string.strip())
+            else:
+                name, exchange_type, durable, auto_delete, arguments = \
+                    re.split(r'\s+', exchange_string.strip())
 
-            if not name:
-                name = 'amq.default'
-
-            if re.search(r'true', durable, re.I):
+            if re.search(r'true', str(durable), re.I):
                 durable = True
             else:
                 durable = False
 
-            if re.search(r'true', auto_delete, re.I):
+            if re.search(r'true', str(auto_delete), re.I):
                 auto_delete = True
             else:
                 auto_delete = False
@@ -158,6 +175,7 @@ class RabbitMQ(CommandPlugin):
                 'exchange_type': exchange_type,
                 'durable': durable,
                 'auto_delete': auto_delete,
+                'federated': federated,
                 'arguments': arguments,
                 }))
 
@@ -173,15 +191,30 @@ class RabbitMQ(CommandPlugin):
             if not queue_string.strip():
                 continue
 
-            name, durable, auto_delete, arguments = \
-                re.split(r'\s+', queue_string)
+            federated = False
+            if queue_string.startswith('federation'):
+                federated = True
+                split_queue = re.split(r'\s+', queue_string.strip())
+                queue_string = (split_queue[1] + " " +
+                                split_queue[4] + " " +
+                                split_queue[5] + " " +
+                                split_queue[6])
+                name, durable, auto_delete, arguments = \
+                    re.split(r'\s+', queue_string.strip())
+            elif queue_string.startswith(('direct','topic','headers','fanout')):
+                queue_string = "amq.default " + queue_string
+                name, durable, auto_delete, arguments = \
+                    re.split(r'\s+', queue_string.strip())
+            else:
+                name, durable, auto_delete, arguments = \
+                    re.split(r'\s+', queue_string.strip())
 
-            if re.search(r'true', durable, re.I):
+            if re.search(r'true', str(durable), re.I):
                 durable = True
             else:
                 durable = False
 
-            if re.search(r'true', auto_delete, re.I):
+            if re.search(r'true', str(auto_delete), re.I):
                 auto_delete = True
             else:
                 auto_delete = False
@@ -191,6 +224,7 @@ class RabbitMQ(CommandPlugin):
                 'title': name,
                 'durable': durable,
                 'auto_delete': auto_delete,
+                'federated': federated,
                 'arguments': arguments,
                 }))
 

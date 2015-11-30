@@ -52,6 +52,7 @@ class IRabbitMQExchangeInfo(IComponentInfo):
     exchange_type = SingleLineText(title=_t(u"Type"))
     durable = schema.Bool(title=_t("Durable"))
     auto_delete = schema.Bool(title=_t("Auto-Delete"))
+    federated = schema.Bool(title=_t("Federated"))
     arguments = SingleLineText(title=_t(u"Arguments"))
 
 
@@ -60,6 +61,7 @@ class IRabbitMQQueueInfo(IComponentInfo):
     rabbitmq_vhost = schema.Entity(title=_t(u"VHost"))
     durable = schema.Bool(title=_t("Durable"))
     auto_delete = schema.Bool(title=_t("Auto-Delete"))
+    federated = schema.Bool(title=_t("Federated"))
     arguments = SingleLineText(title=_t(u"Arguments"))
 
     threshold_messages_max = schema.Int(

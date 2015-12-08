@@ -1,3 +1,9 @@
+*.py[cod]
+
 build
 dist
 *.egg-info
+
+.idea/
+.pydevproject
+.project

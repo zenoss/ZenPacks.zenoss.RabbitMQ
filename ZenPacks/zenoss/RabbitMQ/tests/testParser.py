@@ -61,7 +61,7 @@ class TestParser(BaseTestCase):
 
         cmd = self._getCmd(
             'rabbit@maverick',
-            'rabbitmqctl -q -n rabbit@maverick list_channels pid consumer_count messages_unacknowledged acks_uncommitted 2>&1',
+            'rabbitmqctl -q -n rabbit@maverick list_channels pid consumer_count messages_unacknowledged acks_uncommitted status 2>&1',
             exitCode, output_filename, points)
 
         return cmd
@@ -74,7 +74,7 @@ class TestParser(BaseTestCase):
             results)
 
         self.assertEquals(len(results.values), 3)
-        self.assertEquals(len(results.events), 0)
+        self.assertEquals(len(results.events), 1)
 
     def testListChannels_none(self):
         parser = RabbitMQCTLParser()
@@ -84,7 +84,7 @@ class TestParser(BaseTestCase):
             results)
 
         self.assertEquals(len(results.values), 3)
-        self.assertEquals(len(results.events), 0)
+        self.assertEquals(len(results.events), 1)
 
     def testListChannels_notRunning(self):
         parser = RabbitMQCTLParser()
@@ -112,9 +112,8 @@ class TestParser(BaseTestCase):
 
         cmd = self._getCmd(
             'rabbit@maverick',
-            'rabbitmqctl -q -n rabbit@maverick list_connections pid channels recv_oct recv_cnt send_oct send_cnt send_pend 2>&1',
+            'rabbitmqctl -q -n rabbit@maverick list_connections pid channels recv_oct recv_cnt send_oct send_cnt send_pend status 2>&1',
             exitCode, output_filename, points)
-
         return cmd
 
     def testListConnections(self):
@@ -125,17 +124,18 @@ class TestParser(BaseTestCase):
             results)
 
         self.assertEquals(len(results.values), 7)
-        self.assertEquals(len(results.events), 0)
+        self.assertEquals(len(results.events), 1)
 
     def testListConnections_none(self):
         parser = RabbitMQCTLParser()
         results = ParsedResults()
+
         parser.processResults(
             self._getListConnectionsCmd(0, 'cmd_list_connections_none.txt'),
             results)
 
         self.assertEquals(len(results.values), 7)
-        self.assertEquals(len(results.events), 0)
+        self.assertEquals(len(results.events), 1)
 
     def testListConnections_notRunning(self):
         parser = RabbitMQCTLParser()
@@ -177,7 +177,7 @@ class TestParser(BaseTestCase):
 
         cmd = self._getCmd(
             'rabbit@maverick',
-            'rabbitmqctl -q -n rabbit@dev1 list_queues -p /zenoss name messages_ready messages_unacknowledged messages consumers memory 2>&1',
+            'rabbitmqctl -q -n rabbit@dev1 list_queues -p /zenoss name messages_ready messages_unacknowledged messages consumers memory status 2>&1',
             exitCode, output_filename, points)
 
         return cmd
@@ -191,7 +191,7 @@ class TestParser(BaseTestCase):
             results)
 
         self.assertEquals(len(results.values), 55)
-        self.assertEquals(len(results.events), 0)
+        self.assertEquals(len(results.events), 1)
 
     def testListQueues_none(self):
         parser = RabbitMQCTLParser()
@@ -202,7 +202,7 @@ class TestParser(BaseTestCase):
             results)
 
         self.assertEquals(len(results.values), 0)
-        self.assertEquals(len(results.events), 0)
+        self.assertEquals(len(results.events), 1)
 
     def testListQueues_notRunning(self):
         parser = RabbitMQCTLParser()

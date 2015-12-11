@@ -152,6 +152,10 @@ Rabbitmqadmin uses a user to authenticate with Rabbit for performing operations.
 
 == Change Log ==
 
+;1.0.8
+* (ZEN-20898) Support for Federation Plugin
+* Parser improvements and bug fixes
+
 ;1.0.7
 * (ZEN-11451) Zenoss should track and present event processing rates
 

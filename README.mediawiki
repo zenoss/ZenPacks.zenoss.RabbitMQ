@@ -152,6 +152,9 @@ Rabbitmqadmin uses a user to authenticate with Rabbit for performing operations.
 
 == Change Log ==
 
+;1.0.9
+* (ZPS-2772) Fix modeler omission of RabbitMQ nodes from rabbitmqctl status
+
 ;1.0.8
 * (ZEN-20898) Support for Federation Plugin
 * Parser improvements and bug fixes

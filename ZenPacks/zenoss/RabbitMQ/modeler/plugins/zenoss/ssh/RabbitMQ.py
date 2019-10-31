@@ -52,7 +52,7 @@ class RabbitMQ(CommandPlugin):
         nodes = []
 
         for line in command_strings[0].split('\n'):
-            match = re.search(r'Status of node (\S+)\s', line)
+            match = re.search(r'Status of node (\S+).*$', line)
             if match:
                 node_title = match.group(1).strip("'")
                 node_id = prepId(node_title)

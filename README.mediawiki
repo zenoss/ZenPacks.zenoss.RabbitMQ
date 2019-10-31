@@ -61,7 +61,7 @@ You should then add the zenoss.ssh.RabbitMQ modeler plugin to the device, or dev
 * Status - Running or not? Generates event on failure.
 * Open Connections & Channels
 * Sent & Received Bytes Rate
-* Sent & Received Messages Rate
+* Sent & Received Packets Rate
 * Depth of Send Queue
 * Consumers
 * Unacknowledged & Uncommitted Messages
@@ -70,6 +70,7 @@ You should then add the zenoss.ssh.RabbitMQ modeler plugin to the device, or dev
 * Ready, Unacknowledged & Total Messages
 * Memory Usage
 * Consumers
+* Incoming & Outgoing Message Rates
 
 There is a default threshold of 1,000,000 messages per queue. This is almost certainly an absurdly high threshold that shouldn't trip in normal systems. However, by clicking into the details of any individual queue you can set the per-queue threshold to a more reasonable value that makes sense for a given queue.
 
@@ -151,6 +152,9 @@ Rabbitmqadmin uses a user to authenticate with Rabbit for performing operations.
  * If you are running the SSH commands as a non-root user, chown (your user):(your group) /usr/local/bin/rabbitmqadmin
 
 == Change Log ==
+
+;1.0.9
+* (ZPS-2772) Fix modeler omission of RabbitMQ nodes from rabbitmqctl status
 
 ;1.0.8
 * (ZEN-20898) Support for Federation Plugin

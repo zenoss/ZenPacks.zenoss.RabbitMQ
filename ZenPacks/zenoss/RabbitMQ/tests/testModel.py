@@ -78,7 +78,7 @@ class TestModel(BaseTestCase):
     def testRabbitMQNode(self):
         self._loadZenossData()
 
-        self.assertEquals(self.d.rabbitmq_nodes.countObjects(), 1)
+        self.assertEquals(self.d.rabbitmq_nodes.countObjects(), 2)
 
         info = IInfo(self.d.rabbitmq_nodes()[0])
         self.assertEquals(info.vhostCount, 2)

@@ -1,3 +1,4 @@
+Status of node rabbit@dev2
 Status of node rabbit@dev1 ...
 [{running_applications,[{rabbit,"RabbitMQ","2.2.0"},
                         {os_mon,"CPO  CXC 138 46","2.1.8"},

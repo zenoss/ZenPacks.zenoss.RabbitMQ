@@ -23,15 +23,15 @@ from Products.ZenUtils.Utils import prepId
 
 class RabbitMQ(CommandPlugin):
     command = (
-        'rabbitmqctl status 2>&1 && ('
+        'rabbitmqctl -s status 2>&1 && ('
         'echo __COMMAND__ ; '
-        'for vhost in $(rabbitmqctl -q list_vhosts) ; do '
+        'for vhost in $(rabbitmqctl -s -q list_vhosts) ; do '
         'echo "VHOST: $vhost" ; '
         'echo "__SPLIT__" ; '
-        'rabbitmqctl -q list_exchanges -p $vhost '
+        'rabbitmqctl -s -q list_exchanges -p $vhost '
         'name type durable auto_delete arguments ; '
         'echo "__SPLIT__" ; '
-        'rabbitmqctl -q list_queues -p $vhost '
+        'rabbitmqctl -s -q list_queues -p $vhost '
         'name durable auto_delete arguments ; '
         'echo "__VHOST__" ; '
         'done'
@@ -212,6 +212,9 @@ class RabbitMQ(CommandPlugin):
                 queue_string = "amq.default " + queue_string
                 name, durable, auto_delete, arguments = \
                     re.split(r'\s+', queue_string.strip())
+            elif queue_string.startswith(('{:badrpc')):
+                LOG.error("Broken result for Queue String")
+                continue  # Broken result, nothing to add
             else:
                 name, durable, auto_delete, arguments = \
                     re.split(r'\s+', queue_string.strip())

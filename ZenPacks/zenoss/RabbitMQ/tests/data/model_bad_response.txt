@@ -1,0 +1,114 @@
+Status of node rabbit@maverick ...
+[1mRuntime[0m
+OS PID: 13563
+OS: Linux
+Uptime (seconds): 1694129
+RabbitMQ version: 3.8.2
+Node name: rabbit@maverick
+Erlang configuration: Erlang/OTP 22 [erts-10.6.2] [source] [64-bit] [smp:1:1] [ds:1:1:10] [async-threads:64] [hipe]
+Erlang processes: 740 used, 1048576 limit
+Scheduler run queue: 1
+Cluster heartbeat timeout (net_ticktime): 60
+
+[1mPlugins[0m
+
+Enabled plugin file: /etc/rabbitmq/enabled_plugins
+Enabled plugins:
+
+ * rabbitmq_web_mqtt
+ * rabbitmq_mqtt
+ * rabbitmq_auth_backend_ldap
+ * rabbitmq_management
+ * rabbitmq_management_agent
+ * rabbitmq_message_timestamp
+ * rabbitmq_web_dispatch
+ * cowboy
+ * amqp_client
+ * cowlib
+
+[1mData directory[0m
+
+Node data directory: /var/lib/rabbitmq/mnesia/rabbit@maverick
+
+[1mConfig files[0m
+
+ * /etc/rabbitmq/rabbitmq.config
+
+[1mLog file(s)[0m
+
+ * /var/log/rabbitmq/rabbit@maverick.log
+ * /var/log/rabbitmq/rabbit@maverick_upgrade.log
+
+[1mAlarms[0m
+
+(none)
+
+[1mMemory[0m
+
+Calculation strategy: rss
+Memory high watermark setting: 0.4 of available memory, computed to: 0.7711 gb
+quorum_ets: 0.298 gb (60.19 %)
+allocated_unused: 0.075 gb (15.16 %)
+other_proc: 0.0331 gb (6.68 %)
+code: 0.0265 gb (5.35 %)
+queue_slave_procs: 0.0215 gb (4.34 %)
+other_system: 0.0122 gb (2.47 %)
+binary: 0.0102 gb (2.06 %)
+other_ets: 0.0073 gb (1.47 %)
+plugins: 0.0033 gb (0.67 %)
+mgmt_db: 0.0023 gb (0.46 %)
+atom: 0.0015 gb (0.31 %)
+connection_other: 0.0013 gb (0.26 %)
+connection_channels: 0.001 gb (0.2 %)
+msg_index: 0.0006 gb (0.13 %)
+connection_readers: 0.0003 gb (0.06 %)
+queue_procs: 0.0003 gb (0.06 %)
+mnesia: 0.0002 gb (0.04 %)
+quorum_queue_procs: 0.0002 gb (0.04 %)
+metrics: 0.0001 gb (0.03 %)
+connection_writers: 0.0001 gb (0.02 %)
+reserved_unallocated: 0.0 gb (0.0 %)
+
+[1mFile Descriptors[0m
+
+Total: 27, limit: 32671
+Sockets: 9, limit: 29401
+
+[1mFree Disk Space[0m
+
+Low free disk space watermark: 0.05 gb
+Free disk space: 38.701 gb
+
+[1mTotals[0m
+
+Connection count: 9
+Queue count: 18
+Virtual host count: 1
+
+[1mListeners[0m
+
+Interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication
+Interface: [::], port: 15675, protocol: http/web-mqtt, purpose: MQTT over WebSockets
+Interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0
+Interface: [::], port: 15672, protocol: http, purpose: HTTP API
+Interface: [::], port: 1883, protocol: mqtt, purpose: MQTT
+__COMMAND__
+VHOST: name
+__SPLIT__
+__SPLIT__
+{:badrpc, {:timeout, 60.0, "Some queue(s) are unresponsive, use list_unresponsive_queues command."}}
+__VHOST__
+VHOST: /
+__SPLIT__
+name	type	durable	auto_delete	arguments
+deadletter	topic	true	false	[]
+amq.direct	direct	true	false	[]
+amq.fanout	fanout	true	false	[]
+    direct	true	false	[]
+amq.match	headers	true	false	[]
+amq.topic	topic	true	false	[]
+amq.rabbitmq.trace	topic	true	false	[]
+amq.headers	headers	true	false	[]
+__SPLIT__
+{:badrpc, {:timeout, 60.0, "Some queue(s) are unresponsive, use list_unresponsive_queues command."}}
+__VHOST__

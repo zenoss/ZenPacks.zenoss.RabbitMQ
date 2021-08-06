@@ -61,6 +61,13 @@ class TestModeler(BaseTestCase):
 
         self.assertEquals(len(data_maps), 6)
 
+    def testBadResponse(self):
+        modeler = RabbitMQModeler()
+        modeler_results = loadData('model_bad_response.txt')
+        rel_maps = modeler.process(self.d, modeler_results, log)
+        self.assertEquals(len(rel_maps), 6)
+        self.assertEquals(rel_maps[3].maps, [])
+        self.assertEquals(rel_maps[5].maps, [])
 
 def test_suite():
     from unittest import TestSuite, makeSuite

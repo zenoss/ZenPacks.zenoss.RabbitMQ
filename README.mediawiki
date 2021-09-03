@@ -145,13 +145,17 @@ Rabbitmqadmin uses a user to authenticate with Rabbit for performing operations.
 ; 4. Download the rabbitmqadmin script
 1. Download the rabbitmqadmin script to /usr/local/bin/:
  * cd /usr/local/bin
- * RabbitMQ 2.x: wget http://{your-rabbitmq-server}:55672/cli/rabbitmqadmin -u {your-rabbitmq-user} -p {your-rabbitmq-user-password}
- * RabbitMQ 3.x: wget http://{your-rabbitmq-server}:15672/cli/rabbitmqadmin -u {your-rabbitmq-user} -p {your-rabbitmq-user-password}
+ * RabbitMQ 2.x: wget http://{your-rabbitmq-server}:55672/cli/rabbitmqadmin --user {your-rabbitmq-user} --password {your-rabbitmq-user-password}
+ * RabbitMQ 3.x: wget http://{your-rabbitmq-server}:15672/cli/rabbitmqadmin --user {your-rabbitmq-user} --password {your-rabbitmq-user-password}
 2. Make the rabbitmqadmin file executable and update ownership:
  * chmod +x /usr/local/bin/rabbitmqadmin
  * If you are running the SSH commands as a non-root user, chown (your user):(your group) /usr/local/bin/rabbitmqadmin
 
 == Change Log ==
+
+;1.0.10
+* (ZPS-6912) Fix Traceback generated when no queries are being returned for the vhost name
+* (ZPS-6937) Fix RabbitMQ 3.8.x targets break parsing
 
 ;1.0.9
 * (ZPS-2772) Fix modeler omission of RabbitMQ nodes from rabbitmqctl status

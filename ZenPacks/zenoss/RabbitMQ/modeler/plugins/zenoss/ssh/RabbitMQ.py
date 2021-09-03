@@ -24,7 +24,7 @@ from Products.ZenUtils.Utils import prepId
 class RabbitMQ(CommandPlugin):
     command = (
         'BASE_VERSION="3.8.0" &&'
-        'VV=$(rabbitmqctl status 2>&1|grep rabbit,) &&'
+        'VV=$(rabbitmqctl status 2>&1|grep rabbit, || rabbitmqctl version) &&'
         'PAT="([0-9]+\.[0-9]+\.[0-9]+)" &&'
         '[[ $VV =~ $PAT ]] &&'
         'function ComparingRabbit { [[ "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]];} &&'
@@ -60,12 +60,19 @@ class RabbitMQ(CommandPlugin):
 
         rabbit_regex = re.search(r'rabbit,"RabbitMQ","[0-9]+\.[0-9]+\.[0-9]+"',
                                  command_strings[0])
+        rabbit_regex_newer_version = re.search(r'RabbitMQ version: [0-9]+\.[0-9]+\.[0-9]+',
+                                               command_strings[0])
+
         if rabbit_regex:
             rabbit_match = rabbit_regex.group(0)
+            rabbit_version = re.search('([0-9]+\.[0-9]+\.[0-9]+)', rabbit_match).group(1)
+        if rabbit_regex_newer_version:
+            rabbit_match = rabbit_regex_newer_version.group(0)
             rabbit_version = re.search('([0-9]+\.[0-9]+\.[0-9]+)', rabbit_match).group(1)
 
         for line in command_strings[0].split('\n'):
             match = re.search(r'Status of node (\S+).*$', line)
+            match_newer_version = re.search(r'Node name: (\S+).*$', line)
             if match:
                 node_title = match.group(1).strip("'")
                 node_id = prepId(node_title)
@@ -73,8 +80,16 @@ class RabbitMQ(CommandPlugin):
                     'id': node_id,
                     'title': node_title,
                     'rabbit_version': rabbit_version,
-                    }))
-
+                }))
+                continue
+            elif match_newer_version:
+                node_title = match_newer_version.group(1).strip("'")
+                node_id = prepId(node_title)
+                nodes.append(ObjectMap(data={
+                    'id': node_id,
+                    'title': node_title,
+                    'rabbit_version': rabbit_version,
+                }))
                 continue
 
             match = re.search(r'^(Error: .+)$', line)

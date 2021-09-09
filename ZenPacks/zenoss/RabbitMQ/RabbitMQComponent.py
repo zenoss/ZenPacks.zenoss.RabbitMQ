@@ -14,6 +14,7 @@
 from Products.ZenModel.DeviceComponent import DeviceComponent
 from Products.ZenModel.ManagedEntity import ManagedEntity
 from Products.ZenModel.ZenossSecurity import ZEN_CHANGE_DEVICE
+from Products.ZenUtils.Version import getVersionTupleFromString
 
 
 class RabbitMQComponent(DeviceComponent, ManagedEntity):
@@ -22,10 +23,17 @@ class RabbitMQComponent(DeviceComponent, ManagedEntity):
     DeviceComponent subclasses in this ZenPack.
     """
 
+    rabbit_version = None
+
     # Disambiguate multi-inheritence.
     _properties = ManagedEntity._properties
     _relations = ManagedEntity._relations
 
+    _properties = _properties + (
+        {
+            'id': 'rabbit_version', 'type': 'int', 'mode': 'w'
+        },
+    )
     # This makes the "Templates" component display available.
     factory_type_information = ({
         'actions': ({
@@ -41,3 +49,12 @@ class RabbitMQComponent(DeviceComponent, ManagedEntity):
 
     # Commands are run via SSH and should not be specified absolutely.
     zCommandPath = ''
+
+    @property
+    def rabbitmq_version_flag(self):
+        flag = ''
+        if self.rabbit_version:
+            if getVersionTupleFromString(self.rabbit_version) >= \
+                    getVersionTupleFromString("3.8.0"):
+                flag = '-s'
+        return flag

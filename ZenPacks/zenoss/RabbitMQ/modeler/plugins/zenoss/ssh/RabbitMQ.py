@@ -23,15 +23,21 @@ from Products.ZenUtils.Utils import prepId
 
 class RabbitMQ(CommandPlugin):
     command = (
-        'rabbitmqctl status 2>&1 && ('
+        'BASE_VERSION="3.8.0" &&'
+        'VV=$(rabbitmqctl status 2>&1|grep rabbit, || rabbitmqctl version) &&'
+        'PAT="([0-9]+\.[0-9]+\.[0-9]+)" &&'
+        '[[ $VV =~ $PAT ]] &&'
+        'function ComparingRabbit { [[ "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]];} &&'
+        '$(ComparingRabbit $BASE_VERSION ${BASH_REMATCH[0]} ) && FLAG="-s" || FLAG="" &&'
+        'rabbitmqctl $FLAG status 2>&1 && ('
         'echo __COMMAND__ ; '
-        'for vhost in $(rabbitmqctl -q list_vhosts) ; do '
+        'for vhost in $(rabbitmqctl $FLAG -q list_vhosts) ; do '
         'echo "VHOST: $vhost" ; '
         'echo "__SPLIT__" ; '
-        'rabbitmqctl -q list_exchanges -p $vhost '
+        'rabbitmqctl $FLAG -q list_exchanges -p $vhost '
         'name type durable auto_delete arguments ; '
         'echo "__SPLIT__" ; '
-        'rabbitmqctl -q list_queues -p $vhost '
+        'rabbitmqctl $FLAG -q list_queues -p $vhost '
         'name durable auto_delete arguments ; '
         'echo "__VHOST__" ; '
         'done'
@@ -50,17 +56,40 @@ class RabbitMQ(CommandPlugin):
         node_title = None
         node_id = None
         nodes = []
+        rabbit_version = None
+
+        rabbit_regex = re.search(r'rabbit,"RabbitMQ","[0-9]+\.[0-9]+\.[0-9]+"',
+                                 command_strings[0])
+        rabbit_regex_newer_version = re.search(r'RabbitMQ version: [0-9]+\.[0-9]+\.[0-9]+',
+                                               command_strings[0])
+
+        if rabbit_regex:
+            rabbit_match = rabbit_regex.group(0)
+            rabbit_version = re.search('([0-9]+\.[0-9]+\.[0-9]+)', rabbit_match).group(1)
+        if rabbit_regex_newer_version:
+            rabbit_match = rabbit_regex_newer_version.group(0)
+            rabbit_version = re.search('([0-9]+\.[0-9]+\.[0-9]+)', rabbit_match).group(1)
 
         for line in command_strings[0].split('\n'):
             match = re.search(r'Status of node (\S+).*$', line)
+            match_newer_version = re.search(r'Node name: (\S+).*$', line)
             if match:
                 node_title = match.group(1).strip("'")
                 node_id = prepId(node_title)
                 nodes.append(ObjectMap(data={
                     'id': node_id,
                     'title': node_title,
-                    }))
-
+                    'rabbit_version': rabbit_version,
+                }))
+                continue
+            elif match_newer_version:
+                node_title = match_newer_version.group(1).strip("'")
+                node_id = prepId(node_title)
+                nodes.append(ObjectMap(data={
+                    'id': node_id,
+                    'title': node_title,
+                    'rabbit_version': rabbit_version,
+                }))
                 continue
 
             match = re.search(r'^(Error: .+)$', line)
@@ -85,10 +114,11 @@ class RabbitMQ(CommandPlugin):
 
         # vhosts
         maps.extend(self.getVHostRelMap(
-            device, command_strings[1], 'rabbitmq_nodes/%s' % node_id))
+            device, command_strings[1], 'rabbitmq_nodes/%s' % node_id,
+            rabbit_version))
         return maps
 
-    def getVHostRelMap(self, device, vhosts_string, compname):
+    def getVHostRelMap(self, device, vhosts_string, compname, rabbit_version=None):
         rel_maps = []
         object_maps = []
 
@@ -110,13 +140,14 @@ class RabbitMQ(CommandPlugin):
                 object_maps.append(ObjectMap(data={
                     'id': vhost_id,
                     'title': vhost_title,
+                    'rabbit_version': rabbit_version,
                     }))
 
                 exchanges = self.getExchangeRelMap(exchanges_string,
-                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id))
+                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id), rabbit_version)
 
                 queues = self.getQueueRelMap(queues_string,
-                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id))
+                    '%s/rabbitmq_vhosts/%s' % (compname, vhost_id), rabbit_version)
 
                 LOG.info(
                     'Found vhost %s with %d exchanges and %d queues on %s',
@@ -132,7 +163,7 @@ class RabbitMQ(CommandPlugin):
             modname='ZenPacks.zenoss.RabbitMQ.RabbitMQVHost',
             objmaps=object_maps)] + rel_maps
 
-    def getExchangeRelMap(self, exchanges_string, compname):
+    def getExchangeRelMap(self, exchanges_string, compname, rabbit_version=None):
         object_maps = []
         for exchange_string in exchanges_string.split('\n'):
             if not exchange_string.strip():
@@ -180,15 +211,15 @@ class RabbitMQ(CommandPlugin):
                 'auto_delete': auto_delete,
                 'federated': federated,
                 'arguments': arguments,
+                'rabbit_version': rabbit_version,
                 }))
-
         return RelationshipMap(
             compname=compname,
             relname='rabbitmq_exchanges',
             modname='ZenPacks.zenoss.RabbitMQ.RabbitMQExchange',
             objmaps=object_maps)
 
-    def getQueueRelMap(self, queues_string, compname):
+    def getQueueRelMap(self, queues_string, compname, rabbit_version=None):
         object_maps = []
         for queue_string in queues_string.split('\n'):
             if not queue_string.strip():
@@ -212,6 +243,9 @@ class RabbitMQ(CommandPlugin):
                 queue_string = "amq.default " + queue_string
                 name, durable, auto_delete, arguments = \
                     re.split(r'\s+', queue_string.strip())
+            elif queue_string.startswith(('{:badrpc')):
+                LOG.error("Broken result for Queue String")
+                continue  # Broken result, nothing to add
             else:
                 name, durable, auto_delete, arguments = \
                     re.split(r'\s+', queue_string.strip())
@@ -233,6 +267,7 @@ class RabbitMQ(CommandPlugin):
                 'auto_delete': auto_delete,
                 'federated': federated,
                 'arguments': arguments,
+                'rabbit_version': rabbit_version,
                 }))
 
         return RelationshipMap(

@@ -156,6 +156,7 @@ Rabbitmqadmin uses a user to authenticate with Rabbit for performing operations.
 ;1.0.10
 * (ZPS-6912) Fix Traceback generated when no queries are being returned for the vhost name
 * (ZPS-6937) Fix RabbitMQ 3.8.x targets break parsing
+* Tested with Zenoss Cloud, Zenoss 6.6.0, Zenoss 6.5.0 and Service Impact 5.5.3
 
 ;1.0.9
 * (ZPS-2772) Fix modeler omission of RabbitMQ nodes from rabbitmqctl status
